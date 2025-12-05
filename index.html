@@ -42,7 +42,6 @@
             z-index: 1;
             border: 1px solid rgba(110, 203, 255, 0.18);
             box-shadow: 0 10px 24px rgba(3, 7, 30, 0.45);
-            backdrop-filter: blur(6px);
         }
 
         /* View_Results page h1 - Black color */
@@ -115,12 +114,10 @@
             font-weight: 600;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
             box-shadow: 0 8px 20px rgba(45, 116, 255, 0.35);
         }
 
         button:hover:not(:disabled) {
-            transform: translateY(-2px);
             box-shadow: 0 12px 26px rgba(45, 116, 255, 0.45);
         }
 
@@ -172,7 +169,6 @@
 
         .status.loading::before {
             background: var(--main-color);
-            animation: pulse 1.5s infinite;
         }
 
         .status.success::before {
@@ -184,14 +180,8 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(0.9); }
-        }
-
-        @keyframes aurora {
-            0% { transform: translate(-5%, -5%) scale(1); opacity: 0.9; }
-            50% { transform: translate(8%, 6%) scale(1.1); opacity: 0.65; }
-            100% { transform: translate(-5%, -5%) scale(1); opacity: 0.9; }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
         }
 
         table {
@@ -235,7 +225,6 @@
             border-bottom: 1px solid rgba(110, 203, 255, 0.1);
             font-size: 0.95rem;
             color: rgba(223, 239, 255, 0.95);
-            transition: all 0.25s ease;
             background: rgba(6, 18, 44, 0.75);
         }
 
@@ -245,9 +234,6 @@
             font-weight: 800;
         }
 
-        tbody tr {
-            transition: all 0.25s ease;
-        }
 
         tbody tr:hover {
             background: rgba(21, 53, 103, 0.85);
@@ -424,12 +410,6 @@
             height: 8px;
             background: var(--main-color);
             border-radius: 50%;
-            animation: blink 1.5s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
         }
 
         .last-update {
@@ -486,52 +466,10 @@
                 radial-gradient(circle at 20% 30%, rgba(95, 191, 255, 0.25) 0%, transparent 50%),
                 radial-gradient(circle at 80% 70%, rgba(45, 116, 255, 0.2) 0%, transparent 50%),
                 radial-gradient(circle at 50% 50%, rgba(70, 160, 255, 0.18) 0%, transparent 70%);
-            animation: cosmicPulse 8s ease-in-out infinite;
-        }
-        
-        @keyframes cosmicPulse {
-            0%, 100% { opacity: 0.65; transform: scale(1); }
-            50% { opacity: 0.85; transform: scale(1.03); }
         }
         
         .particle {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            background: #7fd0ff;
-            border-radius: 50%;
-            opacity: 0.5;
-            animation: float3D 10s infinite linear;
-            box-shadow: 0 0 6px rgba(127, 208, 255, 0.55), 0 0 12px rgba(127, 208, 255, 0.25);
-        }
-        
-        .particle:nth-child(3n) {
-            width: 4px;
-            height: 4px;
-            box-shadow: 0 0 8px rgba(127, 208, 255, 0.6), 0 0 16px rgba(127, 208, 255, 0.35);
-        }
-        
-        .particle:nth-child(5n) {
-            width: 2px;
-            height: 2px;
-            opacity: 0.4;
-        }
-        
-        @keyframes float3D {
-            0% {
-                transform: translate3d(0, 100vh, 0) rotateZ(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translate3d(100px, -100px, 200px) rotateZ(360deg);
-                opacity: 0;
-            }
+            display: none;
         }
         
         /* 3D Logo container with perspective and enhanced effects */
@@ -544,8 +482,6 @@
             justify-content: center;
             align-items: center;
             z-index: 10;
-            transform-style: preserve-3d;
-            filter: drop-shadow(0 0 20px rgba(111, 203, 255, 0.3));
         }
         
         /* Text below LT logo */
@@ -554,9 +490,7 @@
             width: 100%;
             margin-top: 40px;
             text-align: center;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: textAppear 0.6s ease-out 1.4s forwards;
+            opacity: 1;
         }
         
         .logo-text-main {
@@ -584,10 +518,7 @@
             letter-spacing: -18px;
             line-height: 1.2;
             position: relative;
-            transform-style: preserve-3d;
-            opacity: 0;
-            animation: logo3DEntry 2.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-            filter: drop-shadow(0 0 15px rgba(111, 203, 255, 0.35));
+            opacity: 1;
         }
         
         
@@ -595,131 +526,23 @@
             display: inline-block;
             color: #7fd0ff;
             position: relative;
-            transform-style: preserve-3d;
         }
         
         .lt-logo .letter-t {
             display: inline-block;
             position: relative;
-            transform-style: preserve-3d;
             color: #7fd0ff;
         }
         
         /* Smooth diagonal bar that cuts through LT */
         .lt-logo::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: -25%;
-            width: 180%;
-            height: 14px;
-            background: linear-gradient(
-                90deg,
-                transparent 0%,
-                rgba(255, 255, 255, 1) 30%,
-                rgba(255, 255, 255, 1) 70%,
-                transparent 100%
-            );
-            box-shadow: 
-                0 0 10px rgba(255, 255, 255, 0.8),
-                0 0 20px rgba(255, 255, 255, 0.6);
-            transform: rotate(-45deg) translateY(-50%) translateX(-250%);
-            animation: barCutThrough 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.6s forwards;
-            z-index: 100;
-            pointer-events: none;
-            border-radius: 2px;
+            display: none;
         }
         
-        /* Erase effect - creates gap in middle of LT when bar passes */
-        
-        /* Premium 3D Entry Animation */
-        @keyframes logo3DEntry {
-            0% {
-                opacity: 0;
-                transform: perspective(1500px) rotateX(90deg) rotateY(-20deg) scale(0.3) translateZ(-500px);
-                filter: blur(20px);
-            }
-            30% {
-                opacity: 1;
-                transform: perspective(1500px) rotateX(0deg) rotateY(10deg) scale(1.1) translateZ(0px);
-                filter: blur(5px);
-            }
-            60% {
-                transform: perspective(1500px) rotateX(0deg) rotateY(-5deg) scale(1) translateZ(0px);
-                filter: blur(0px);
-            }
-            80% {
-                transform: perspective(1500px) rotateX(0deg) rotateY(0deg) scale(1) translateZ(0px);
-            }
-            100% {
-                opacity: 1;
-                transform: perspective(1500px) rotateX(0deg) rotateY(0deg) scale(1) translateZ(0px);
-            }
-        }
-        
-        /* Fast bar cut through animation */
-        @keyframes barCutThrough {
-            0% {
-                transform: rotate(-45deg) translateY(-50%) translateX(-250%);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: rotate(-45deg) translateY(-50%) translateX(250%);
-                opacity: 0;
-            }
-        }
-        
-        /* Fast erase cut animation - creates gap in middle of LT */
-        @keyframes eraseCut {
-            0% {
-                transform: rotate(-45deg) translateY(-50%) translateX(-250%);
-                opacity: 0;
-            }
-            5% {
-                opacity: 1;
-            }
-            95% {
-                opacity: 1;
-            }
-            100% {
-                transform: rotate(-45deg) translateY(-50%) translateX(250%);
-                opacity: 0;
-            }
-        }
-        
-        /* Premium fade out with 3D zoom */
-        @keyframes fadeOut3D {
-            from {
-                opacity: 1;
-                transform: perspective(1500px) rotateX(0deg) rotateY(0deg) scale(1) translateZ(0px);
-            }
-            to {
-                opacity: 0;
-                transform: perspective(1500px) rotateX(10deg) rotateY(10deg) scale(1.5) translateZ(200px);
-                filter: blur(10px);
-            }
-        }
-        
+        /* Premium fade out */
         #introAnimation.fade-out {
-            animation: fadeOut3D 0.7s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
-        }
-        
-        /* Text appear animation */
-        @keyframes textAppear {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
         /* Mobile responsive - No Boxes, Smaller Text */
@@ -926,9 +749,7 @@
             inset: 0;
             pointer-events: none;
             background: radial-gradient(60% 80% at 50% 20%, rgba(80, 168, 255, 0.3), transparent 60%);
-            filter: blur(80px);
             opacity: 0.8;
-            animation: aurora 18s ease-in-out infinite;
         }
         
         .quantum-gate {
@@ -940,8 +761,6 @@
             box-shadow:
                 0 25px 60px rgba(3, 7, 30, 0.85),
                 inset 0 0 45px rgba(110, 203, 255, 0.08);
-            backdrop-filter: blur(22px);
-            -webkit-backdrop-filter: blur(22px);
             display: flex;
             flex-direction: column;
             gap: 18px;
@@ -1808,13 +1627,13 @@
         /* Period Number Styling */
         .period-number {
             font-weight: 700;
-            color: #000000;
+            color: #ffffff;
             font-family: 'Courier New', monospace;
         }
         
-        /* Results Number Column - Black Color */
+        /* Results Number Column - White Color */
         td.number-column {
-            color: #000000 !important;
+            color: #ffffff !important;
             font-weight: 700;
         }
         
