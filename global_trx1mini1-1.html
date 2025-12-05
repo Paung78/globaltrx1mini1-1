@@ -1,0 +1,3319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <title>Global TRX Mini V1.1 - Results Data Viewer</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #041330;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(255, 71, 87, 0.35), transparent 45%),
+                radial-gradient(circle at 80% 0%, rgba(83, 82, 237, 0.35), transparent 50%),
+                radial-gradient(circle at 50% 100%, rgba(46, 213, 115, 0.3), transparent 50%),
+                linear-gradient(135deg, #031536 0%, #041d43 50%, #021230 100%);
+            padding: 32px;
+            min-height: 100vh;
+            color: var(--main-color);
+            position: relative;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+            padding-top: calc(32px + env(safe-area-inset-top));
+            padding-bottom: calc(32px + env(safe-area-inset-bottom));
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(4, 14, 30, 0.65);
+            border-radius: 24px;
+            padding: 32px;
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(110, 203, 255, 0.18);
+            box-shadow: 0 10px 24px rgba(3, 7, 30, 0.45);
+            backdrop-filter: blur(6px);
+        }
+
+        /* View_Results page h1 - Black color */
+        #resultsContainer h1,
+        .results-container h1 {
+            color: #000000;
+        }
+        
+        h1 {
+            color: #e3e7ef;
+            text-align: center;
+            margin-bottom: 12px;
+            font-size: clamp(1.6rem, 5.4vw, 2.8rem);
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            white-space: nowrap;
+            overflow: visible;
+            text-overflow: clip;
+            word-break: keep-all;
+            line-height: 1.2;
+            text-shadow: none;
+        }
+        h1 {
+            color: #e3e7ef;
+            text-align: center;
+            margin-bottom: 12px;
+            font-size: clamp(1.6rem, 5.4vw, 2.8rem);
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            white-space: nowrap;
+            overflow: visible;
+            text-overflow: clip;
+            word-break: keep-all;
+            line-height: 1.2;
+            text-shadow: 0 0 40px rgba(255, 215, 130, 0.25);
+        }
+
+        .title-subtitle span {
+            display: inline-block;
+            letter-spacing: inherit;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(224, 243, 255, 0.85);
+            margin-bottom: 40px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 18px;
+        }
+
+        button {
+            background: linear-gradient(120deg, #5ed0ff, #2d74ff);
+            color: #fefefe;
+            border: 0;
+            padding: 12px 24px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            box-shadow: 0 8px 20px rgba(45, 116, 255, 0.35);
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 26px rgba(45, 116, 255, 0.45);
+        }
+
+        button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .status {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 2px solid var(--main-color);
+            background: var(--white-bg);
+            color: var(--main-color);
+        }
+
+        .status.loading {
+            background: var(--white-bg);
+            color: var(--main-color);
+            border-color: var(--main-color);
+        }
+
+        .status.success {
+            background: var(--white-bg);
+            color: var(--main-color);
+            border-color: var(--main-color);
+        }
+
+        .status.error {
+            background: var(--white-bg);
+            color: var(--main-color);
+            border-color: var(--main-color);
+        }
+
+        .status::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: inline-block;
+            background: var(--main-color);
+        }
+
+        .status.loading::before {
+            background: var(--main-color);
+            animation: pulse 1.5s infinite;
+        }
+
+        .status.success::before {
+            background: var(--main-color);
+        }
+
+        .status.error::before {
+            background: var(--main-color);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.9); }
+        }
+
+        @keyframes aurora {
+            0% { transform: translate(-5%, -5%) scale(1); opacity: 0.9; }
+            50% { transform: translate(8%, 6%) scale(1.1); opacity: 0.65; }
+            100% { transform: translate(-5%, -5%) scale(1); opacity: 0.9; }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 28px;
+            background: transparent;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(110, 203, 255, 0.18);
+            box-shadow: 0 12px 24px rgba(2, 8, 20, 0.45);
+        }
+
+        thead {
+            background: linear-gradient(120deg, rgba(28, 34, 48, 0.95), rgba(50, 60, 80, 0.95));
+            color: #dfe5ef;
+        }
+
+        th {
+            padding: 20px 22px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.35em;
+            color: #ffffff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        th:first-child {
+            border-top-left-radius: 24px;
+        }
+
+        th:last-child {
+            border-top-right-radius: 24px;
+        }
+
+        td {
+            padding: 18px 22px;
+            border-bottom: 1px solid rgba(110, 203, 255, 0.1);
+            font-size: 0.95rem;
+            color: rgba(223, 239, 255, 0.95);
+            transition: all 0.25s ease;
+            background: rgba(6, 18, 44, 0.75);
+        }
+
+        td.period-number,
+        td.number-column {
+            color: #ffffff;
+            font-weight: 800;
+        }
+
+        tbody tr {
+            transition: all 0.25s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(21, 53, 103, 0.85);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Legacy classes - kept for compatibility */
+        .big {
+            color: var(--yellow-accent);
+            font-weight: 800;
+            font-size: 16px;
+        }
+
+        .small {
+            color: var(--main-color);
+            font-weight: 800;
+            font-size: 16px;
+        }
+
+        /* Legacy issue-number class - kept for compatibility */
+        .issue-number {
+            font-weight: 700;
+            color: var(--main-color);
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Legacy premium-bright class - kept for compatibility */
+        .premium-bright {
+            font-family: 'Courier New', monospace;
+            background: var(--yellow-accent);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 800;
+            color: #000000;
+            border: 2px solid var(--yellow-accent);
+            display: inline-block;
+            letter-spacing: 1px;
+        }
+        
+        /* Enhanced Premium Code - using premium-code class */
+        .premium-code {
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, #06080f, #1a1f2c);
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #f4f6fb;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: inline-block;
+            letter-spacing: 0.45em;
+            text-transform: uppercase;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55);
+        }
+
+        .timestamp {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 36px;
+        }
+
+        .count-display {
+            background: linear-gradient(145deg, rgba(7, 23, 45, 0.9), rgba(10, 32, 66, 0.85));
+            padding: 26px;
+            border-radius: 20px;
+            border: 1px solid rgba(110, 203, 255, 0.35);
+            box-shadow: 0 16px 28px rgba(5, 12, 24, 0.7);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .count-display::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 10% 20%, rgba(110, 203, 255, 0.25), transparent),
+                        radial-gradient(circle at 80% 0%, rgba(255, 215, 0, 0.25), transparent);
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .count-label {
+            color: #f2fbff;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+            text-align: center;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+        }
+
+        .loading-bar-container {
+            width: 100%;
+            height: 52px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 26px;
+            border: 1px solid rgba(110, 203, 255, 0.25);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .loading-bar {
+            height: 100%;
+            border-radius: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            transition: width 0.6s ease;
+            position: relative;
+            min-width: 60px;
+            font-weight: 800;
+            letter-spacing: 0.2em;
+        }
+
+        .loading-bar.yellow {
+            background: linear-gradient(120deg, #ffd86f, #ffc400);
+            box-shadow: 0 8px 20px rgba(255, 196, 0, 0.35);
+        }
+
+        .count-number {
+            color: #0b1b32;
+            font-weight: 900;
+            font-size: 1.1rem;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 80px 20px;
+            color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .no-data svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 24px;
+            opacity: 0.4;
+        }
+
+        .realtime-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--white-bg);
+            color: var(--main-color);
+            border: 2px solid var(--main-color);
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        .realtime-indicator::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--main-color);
+            border-radius: 50%;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .last-update {
+            text-align: center;
+            color: var(--main-color);
+            font-size: 13px;
+            margin-top: 20px;
+            padding: 12px;
+            background: var(--white-bg);
+            border-radius: 8px;
+            border: 2px solid var(--main-color);
+            font-weight: 500;
+        }
+
+        /* Quantum AI Key Unlock Styles */
+        .hidden { display: none !important; }
+        
+        /* ========== PREMIUM 3D INTRO ANIMATION STYLES ========== */
+        #introAnimation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000000;
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+        
+        .intro-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1500px;
+        }
+        
+        /* Premium cosmic background with enhanced gradients */
+        .cosmic-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0.65;
+            pointer-events: none;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(95, 191, 255, 0.25) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(45, 116, 255, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(70, 160, 255, 0.18) 0%, transparent 70%);
+            animation: cosmicPulse 8s ease-in-out infinite;
+        }
+        
+        @keyframes cosmicPulse {
+            0%, 100% { opacity: 0.65; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.03); }
+        }
+        
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #7fd0ff;
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: float3D 10s infinite linear;
+            box-shadow: 0 0 6px rgba(127, 208, 255, 0.55), 0 0 12px rgba(127, 208, 255, 0.25);
+        }
+        
+        .particle:nth-child(3n) {
+            width: 4px;
+            height: 4px;
+            box-shadow: 0 0 8px rgba(127, 208, 255, 0.6), 0 0 16px rgba(127, 208, 255, 0.35);
+        }
+        
+        .particle:nth-child(5n) {
+            width: 2px;
+            height: 2px;
+            opacity: 0.4;
+        }
+        
+        @keyframes float3D {
+            0% {
+                transform: translate3d(0, 100vh, 0) rotateZ(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate3d(100px, -100px, 200px) rotateZ(360deg);
+                opacity: 0;
+            }
+        }
+        
+        /* 3D Logo container with perspective and enhanced effects */
+        .logo-container {
+            position: relative;
+            width: 450px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            transform-style: preserve-3d;
+            filter: drop-shadow(0 0 20px rgba(111, 203, 255, 0.3));
+        }
+        
+        /* Text below LT logo */
+        .logo-text-container {
+            position: relative;
+            width: 100%;
+            margin-top: 40px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: textAppear 0.6s ease-out 1.4s forwards;
+        }
+        
+        .logo-text-main {
+            font-family: 'Arial', 'Impact', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            color: #7fd0ff;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        
+        .logo-text-sub {
+            font-family: 'Arial', 'Impact', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffd782;
+            letter-spacing: 2px;
+        }
+        
+        /* Premium 3D LT Logo with glow effect */
+        .lt-logo {
+            font-family: 'Arial Black', 'Impact', sans-serif;
+            font-size: 220px;
+            font-weight: 900;
+            letter-spacing: -18px;
+            line-height: 1.2;
+            position: relative;
+            transform-style: preserve-3d;
+            opacity: 0;
+            animation: logo3DEntry 2.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            filter: drop-shadow(0 0 15px rgba(111, 203, 255, 0.35));
+        }
+        
+        
+        .lt-logo .letter-l {
+            display: inline-block;
+            color: #7fd0ff;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+        
+        .lt-logo .letter-t {
+            display: inline-block;
+            position: relative;
+            transform-style: preserve-3d;
+            color: #7fd0ff;
+        }
+        
+        /* Smooth diagonal bar that cuts through LT */
+        .lt-logo::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -25%;
+            width: 180%;
+            height: 14px;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 1) 30%,
+                rgba(255, 255, 255, 1) 70%,
+                transparent 100%
+            );
+            box-shadow: 
+                0 0 10px rgba(255, 255, 255, 0.8),
+                0 0 20px rgba(255, 255, 255, 0.6);
+            transform: rotate(-45deg) translateY(-50%) translateX(-250%);
+            animation: barCutThrough 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.6s forwards;
+            z-index: 100;
+            pointer-events: none;
+            border-radius: 2px;
+        }
+        
+        /* Erase effect - creates gap in middle of LT when bar passes */
+        
+        /* Premium 3D Entry Animation */
+        @keyframes logo3DEntry {
+            0% {
+                opacity: 0;
+                transform: perspective(1500px) rotateX(90deg) rotateY(-20deg) scale(0.3) translateZ(-500px);
+                filter: blur(20px);
+            }
+            30% {
+                opacity: 1;
+                transform: perspective(1500px) rotateX(0deg) rotateY(10deg) scale(1.1) translateZ(0px);
+                filter: blur(5px);
+            }
+            60% {
+                transform: perspective(1500px) rotateX(0deg) rotateY(-5deg) scale(1) translateZ(0px);
+                filter: blur(0px);
+            }
+            80% {
+                transform: perspective(1500px) rotateX(0deg) rotateY(0deg) scale(1) translateZ(0px);
+            }
+            100% {
+                opacity: 1;
+                transform: perspective(1500px) rotateX(0deg) rotateY(0deg) scale(1) translateZ(0px);
+            }
+        }
+        
+        /* Fast bar cut through animation */
+        @keyframes barCutThrough {
+            0% {
+                transform: rotate(-45deg) translateY(-50%) translateX(-250%);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: rotate(-45deg) translateY(-50%) translateX(250%);
+                opacity: 0;
+            }
+        }
+        
+        /* Fast erase cut animation - creates gap in middle of LT */
+        @keyframes eraseCut {
+            0% {
+                transform: rotate(-45deg) translateY(-50%) translateX(-250%);
+                opacity: 0;
+            }
+            5% {
+                opacity: 1;
+            }
+            95% {
+                opacity: 1;
+            }
+            100% {
+                transform: rotate(-45deg) translateY(-50%) translateX(250%);
+                opacity: 0;
+            }
+        }
+        
+        /* Premium fade out with 3D zoom */
+        @keyframes fadeOut3D {
+            from {
+                opacity: 1;
+                transform: perspective(1500px) rotateX(0deg) rotateY(0deg) scale(1) translateZ(0px);
+            }
+            to {
+                opacity: 0;
+                transform: perspective(1500px) rotateX(10deg) rotateY(10deg) scale(1.5) translateZ(200px);
+                filter: blur(10px);
+            }
+        }
+        
+        #introAnimation.fade-out {
+            animation: fadeOut3D 0.7s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+        }
+        
+        /* Text appear animation */
+        @keyframes textAppear {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Mobile responsive - No Boxes, Smaller Text */
+        @media (max-width: 768px) {
+            body {
+                padding: 8px 6px;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+            
+            .container {
+                padding: 10px 8px;
+                border-radius: 0;
+            }
+            
+            h1 {
+                font-size: 1rem;
+                letter-spacing: 0;
+                padding: 0;
+                margin-bottom: 4px;
+            }
+            
+            .title-subtitle {
+                font-size: 0.85rem;
+                margin-bottom: 8px;
+            }
+            
+            .subtitle {
+                font-size: 0.75rem;
+                margin-bottom: 10px;
+            }
+            
+            .quantum-title {
+                font-size: 1rem;
+                letter-spacing: 0;
+                padding: 0;
+            }
+            
+            .lt-logo {
+                font-size: 140px;
+                letter-spacing: -10px;
+                line-height: 1.2;
+            }
+            
+            .logo-container {
+                width: 320px;
+                height: 280px;
+            }
+            
+            .logo-text-main {
+                font-size: 14px;
+                padding: 0 10px;
+            }
+            
+            .logo-text-sub {
+                font-size: 11px;
+            }
+            
+            #introAnimation {
+                perspective: 800px;
+            }
+            
+            .intro-container {
+                perspective: 1000px;
+            }
+            
+            .quantum-gate {
+                padding: 30px 20px;
+            }
+            
+            .quantum-input {
+                padding: 14px 16px;
+                font-size: 15px;
+            }
+            
+            .quantum-timer {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+            
+            .quantum-timer-text {
+                font-size: 0.9rem;
+            }
+            
+            .button {
+                font-size: 15px;
+                padding: 0.3em 0;
+                height: 2.3em;
+            }
+            
+            table {
+                font-size: 0.6rem;
+                margin-top: 8px;
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            th, td {
+                padding: 5px 3px;
+                font-size: 0.6rem;
+            }
+            
+            th {
+                font-size: 0.6rem;
+            }
+            
+            .prediction-box, .stats-merged {
+                padding: 0;
+                margin-bottom: 10px;
+            }
+            
+            .prediction-label {
+                font-size: 0.7rem;
+            }
+            
+            .prediction-value {
+                font-size: 0.85rem;
+            }
+            
+            .stats-label-row {
+                font-size: 0.7rem;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .count-display {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.2rem;
+            }
+            
+            .quantum-title {
+                font-size: 1.3rem;
+                letter-spacing: 0.2em;
+            }
+            
+            .lt-logo {
+                font-size: 120px;
+                letter-spacing: -8px;
+            }
+            
+            .logo-container {
+                width: 280px;
+                height: 240px;
+            }
+            
+            .logo-text-main {
+            font-size: 12px;
+            }
+            
+            .logo-text-sub {
+                font-size: 10px;
+            }
+            
+            .container {
+                padding: 15px 10px;
+            }
+            
+            .quantum-gate {
+                padding: 26px 20px 32px;
+                border-radius: 22px;
+            }
+            
+            .quantum-input {
+                letter-spacing: 0.28em;
+                font-size: 0.9rem;
+            }
+            
+            .quantum-button {
+                letter-spacing: 0.25em;
+            }
+        }
+        
+        /* ========== KEY ENTRY SECTION ========== */
+        #gate {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            overflow-x: hidden;
+            overflow-y: auto;
+            background: #03183c;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(255, 71, 87, 0.35), transparent 45%),
+                radial-gradient(circle at 80% 0%, rgba(83, 82, 237, 0.35), transparent 50%),
+                radial-gradient(circle at 50% 100%, rgba(46, 213, 115, 0.3), transparent 50%),
+                linear-gradient(135deg, #02163b 0%, #03224f 55%, #021432 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(20px, 4vw, 50px);
+        }
+
+        #gate::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(60% 80% at 50% 20%, rgba(80, 168, 255, 0.3), transparent 60%);
+            filter: blur(80px);
+            opacity: 0.8;
+            animation: aurora 18s ease-in-out infinite;
+        }
+        
+        .quantum-gate {
+            width: min(480px, 100%);
+            padding: clamp(28px, 6vw, 48px);
+            border-radius: 28px;
+            background: rgba(5, 15, 35, 0.9);
+            border: 1px solid rgba(110, 203, 255, 0.35);
+            box-shadow:
+                0 25px 60px rgba(3, 7, 30, 0.85),
+                inset 0 0 45px rgba(110, 203, 255, 0.08);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .quantum-gate::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(120deg, rgba(159,169,189,0.45), rgba(255,255,255,0));
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite: xor;
+            pointer-events: none;
+        }
+        
+        .quantum-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.3rem, 5vw, 2.1rem);
+            font-weight: 800;
+            color: #f2fbff;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            line-height: 1.3;
+            white-space: normal;
+            text-shadow: 0 0 18px rgba(110, 203, 255, 0.55);
+            margin-bottom: 8px;
+        }
+        
+        .quantum-input {
+            width: 100%;
+            padding: 18px 22px;
+            margin: 4px 0 8px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(110, 203, 255, 0.4);
+            border-radius: 18px;
+            color: #e5f2ff;
+            font-size: 1rem;
+            text-align: center;
+            transition: all 0.35s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.45em;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            box-shadow: inset 0 0 25px rgba(110, 203, 255, 0.08);
+        }
+        
+        .quantum-input::placeholder {
+            color: rgba(229, 242, 255, 0.4);
+            letter-spacing: 0.2em;
+        }
+        
+        .quantum-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 25px rgba(110, 203, 255, 0.35);
+            transform: translateY(-2px);
+        }
+        
+        .quantum-button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(120deg, #5ed0ff, #2d74ff);
+            border: none;
+            border-radius: 999px;
+            color: #ffffff;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            box-shadow: 0 18px 38px rgba(45, 116, 255, 0.45);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .quantum-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 24px 45px rgba(45, 116, 255, 0.55);
+        }
+        
+        .quantum-button i {
+            font-size: 1.1rem;
+        }
+        
+        /* Clock Loader */
+        .loader {
+            width: 68px;
+            height: 68px;
+            border: 6px solid rgba(110, 203, 255, 0.2);
+            border-radius: 50%;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            box-shadow: 0 0 18px rgba(110, 203, 255, 0.3);
+        }
+        
+        .loader span {
+            display: block;
+            background: var(--main-color);
+        }
+        
+        .loader .hour,
+        .loader .min {
+            width: 6px;
+            height: 22px;
+            border-radius: 50px;
+            position: absolute;
+            top: 24.5px;
+            left: 21px;
+            animation: load9243 1.2s linear infinite;
+            transform-origin: top center;
+        }
+        
+        .loader .min {
+            height: 17px;
+            animation: load9243 4s linear infinite;
+        }
+        
+        .loader .circel {
+            width: 10px;
+            height: 10px;
+            border-radius: 50px;
+            position: absolute;
+            top: 19px;
+            left: 19px;
+            background: #7fd0ff;
+        }
+        
+        @keyframes load9243 {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .quantum-timer {
+            margin: 8px 0 4px;
+            padding: 16px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(110, 203, 255, 0.35);
+            font-size: 0.85rem;
+            color: #e6f6ff;
+            font-weight: 700;
+            letter-spacing: 0.3em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .quantum-timer-text {
+            color: #e6f6ff;
+            font-weight: 800;
+            font-size: 0.9rem;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        /* Telegram Button */
+        .telegram-button-wrapper {
+            margin-top: 20px;
+        }
+        
+        .button {
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.04);
+            color: #e6f6ff;
+            padding: 0.35em 0;
+            font-size: 0.95rem;
+            border: 1px solid rgba(110, 203, 255, 0.35);
+            border-radius: 999px;
+            letter-spacing: 0.3em;
+            position: relative;
+            display: flex;
+            align-content: center;
+            align-items: center;
+            overflow: hidden;
+            height: 3.2em;
+            padding-left: 3.2em;
+            padding-right: 1.4em;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.35s ease;
+            box-shadow: inset 0 0 18px rgba(110, 203, 255, 0.12);
+        }
+        
+        .button .icon {
+            background: rgba(255, 255, 255, 0.9);
+            height: 2.4em;
+            width: 2.4em;
+            border-radius: 50%;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            left: 0.6em;
+            transition: all 0.45s;
+        }
+        
+        .icon svg {
+            margin-left: 0.1em;
+            transition: all 0.5s;
+            color: var(--main-color-dark);
+            width: 1.2rem;
+            height: 1.2rem;
+        }
+        
+        .button:hover .icon svg {
+            transform: rotate(360deg);
+        }
+        
+        .button:hover .icon {
+            width: calc(100% - 1rem);
+            border-radius: 999px;
+        }
+        
+        .button:hover {
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 12px 30px rgba(8, 17, 34, 0.7);
+        }
+        
+        .quantum-success {
+            display: none;
+        }
+        
+        .success-icon {
+            display: none;
+        }
+        
+        .results-container {
+            display: none;
+        }
+        
+        .results-container.unlocked {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            input, select, textarea {
+                font-size: 16px;
+            }
+        }
+
+        /* Additional responsive refinements */
+        @media (max-width: 768px) {
+            .container {
+                max-width: 100%;
+                padding: 16px 12px;
+                border-radius: 16px;
+                margin: 0 auto;
+            }
+            h1 {
+                font-size: clamp(1.1rem, 5.2vw, 1.6rem);
+                letter-spacing: 0.3px;
+                padding: 0 8px;
+            }
+            .quantum-title {
+                font-size: clamp(1rem, 5vw, 1.4rem);
+                letter-spacing: 0.3px;
+                padding: 0 8px;
+            }
+            .stats {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            th, td {
+                padding: 10px 8px;
+                font-size: 0.9rem;
+            }
+            /* Mobile responsive refinements for small screens */
+            .container {
+                padding: 16px 10px; /* Reduced padding */
+                margin: 0;
+                width: 100%;
+                border-radius: 0; /* Full width look on mobile */
+            }
+            
+            h1 {
+                font-size: clamp(1.1rem, 5vw, 1.5rem);
+                letter-spacing: 0;
+                padding: 0 5px;
+            }
+            
+            .quantum-title {
+                font-size: clamp(1rem, 4.5vw, 1.3rem);
+                padding: 0 5px;
+            }
+            
+            .stats {
+                gap: 10px;
+            }
+            
+            /* Ultra-optimized table for small screens */
+            table {
+                margin-top: 15px;
+                font-size: 0.8rem;
+            }
+            
+            th, td {
+                padding: 8px 4px; /* Minimized padding */
+                font-size: 0.75rem; /* Smaller text */
+            }
+            
+            /* Adjusted column widths for mobile */
+            thead th:nth-child(1), tbody td:nth-child(1) { width: 8%; text-align: center; }
+            thead th:nth-child(2), tbody td:nth-child(2) { width: 20%; text-align: center; }
+            thead th:nth-child(3), tbody td:nth-child(3) { width: 12%; text-align: center; }
+            thead th:nth-child(4), tbody td:nth-child(4) { width: 20%; text-align: center; }
+            thead th:nth-child(5), tbody td:nth-child(5) { width: 40%; text-align: center; }
+            
+            .premium-code {
+                font-size: 0.75rem; /* Smaller code font */
+                padding: 4px 6px;
+                letter-spacing: 0.5px;
+            }
+            
+            .count-number {
+                font-size: 1.2rem;
+            }
+            
+            .logo-container {
+                transform: scale(0.8); /* Scale down logo on mobile */
+            }
+            
+            /* Prediction Box - Tablet responsive */
+            .prediction-label {
+                font-size: 0.6rem;
+            }
+            
+            .prediction-row {
+                gap: 4px;
+                padding: 6px 0;
+            }
+            
+            .prediction-value,
+            .prediction-rate {
+                font-size: 0.7rem;
+            }
+            
+            .prediction-box {
+                padding: 10px 14px;
+            }
+        }
+        
+        /* Optimized for 6.79 inch phones (360-414px width) - No Boxes, Smaller Text */
+        @media (min-width: 360px) and (max-width: 414px) {
+            body {
+                padding: 8px 6px;
+            }
+            
+            .container {
+                padding: 10px 8px;
+                border-radius: 0;
+            }
+            
+            h1 {
+                font-size: 1rem;
+                margin-bottom: 4px;
+                padding: 0;
+            }
+            
+            .title-subtitle {
+                font-size: 0.85rem;
+                margin-bottom: 8px;
+            }
+            
+            .subtitle {
+                font-size: 0.75rem;
+                margin-bottom: 10px;
+            }
+            
+            /* Prediction Box */
+            .prediction-box {
+                padding: 10px 12px;
+                margin-bottom: 12px;
+            }
+            
+            .prediction-row {
+                padding: 4px 0;
+                gap: 4px;
+            }
+            
+            .prediction-title {
+                font-size: 0.7rem;
+                margin-bottom: 4px;
+            }
+            
+            .prediction-label {
+                font-size: 0.58rem;
+            }
+            
+            .prediction-value,
+            .prediction-rate {
+                font-size: 0.63rem;
+            }
+            
+            /* Stats Box - No Box */
+            .stats-merged {
+                padding: 0;
+                margin-bottom: 10px;
+            }
+            
+            .stats-row {
+                margin-bottom: 8px;
+            }
+            
+            .stats-label-row {
+                font-size: 0.7rem;
+                margin-bottom: 4px;
+            }
+            
+            .loading-bar-container {
+                height: 28px;
+                border-width: 1px;
+            }
+            
+            .count-number {
+                font-size: 0.9rem;
+            }
+            
+            /* Time Remaining Display */
+            #resultsTimeRemaining {
+                padding: 0;
+                margin-bottom: 10px;
+                gap: 8px;
+            }
+            
+            /* Table - Optimized for 6.79 inch - Very Small Text */
+            table {
+                margin-top: 8px;
+                font-size: 0.6rem;
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            th {
+                padding: 6px 3px;
+                font-size: 0.6rem;
+            }
+            
+            td {
+                padding: 5px 3px;
+                font-size: 0.6rem;
+            }
+            
+            .premium-code {
+                font-size: 0.55rem;
+                padding: 2px 4px;
+            }
+            
+            .win-tag, .lose-tag, .pending-tag {
+                font-size: 0.55rem;
+                padding: 2px 6px;
+                min-width: 45px;
+            }
+            
+            /* Column widths optimized for 6.79 inch */
+            thead th:nth-child(1), tbody td:nth-child(1) { width: 7%; }
+            thead th:nth-child(2), tbody td:nth-child(2) { width: 17%; }
+            thead th:nth-child(3), tbody td:nth-child(3) { width: 11%; }
+            thead th:nth-child(4), tbody td:nth-child(4) { width: 17%; }
+            thead th:nth-child(5), tbody td:nth-child(5) { width: 28%; }
+            thead th:nth-child(6), tbody td:nth-child(6) { width: 20%; }
+            
+            .premium-code {
+                font-size: 0.65rem;
+                padding: 3px 6px;
+                letter-spacing: 0.5px;
+            }
+            
+            .period-number {
+                font-size: 0.7rem;
+            }
+            
+            .win-tag, .lose-tag, .pending-tag {
+                font-size: 0.65rem;
+                padding: 3px 8px;
+                min-width: 50px;
+            }
+            
+            /* Ensure no horizontal scroll */
+            body, .container {
+                max-width: 100vw;
+                overflow-x: hidden;
+            }
+        }
+        
+        /* Extra small devices (iPhone SE, older Androids) */
+        @media (max-width: 359px) {
+            th, td {
+                padding: 6px 2px;
+                font-size: 0.7rem;
+            }
+            
+            .premium-code {
+                font-size: 0.7rem;
+                padding: 3px 4px;
+                letter-spacing: 0;
+            }
+            
+            .logo-container {
+                transform: scale(0.6);
+            }
+            
+            /* Prediction Box - Very small phones */
+            .prediction-label {
+                font-size: 0.5rem;
+            }
+            
+            .prediction-row {
+                gap: 3px;
+                padding: 4px 0;
+            }
+            
+            .prediction-value,
+            .prediction-rate {
+                font-size: 0.56rem;
+            }
+            
+            .prediction-box {
+                padding: 8px 10px;
+            }
+        }
+        
+        /* Performance Optimizations */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body, .container, .quantum-gate {
+            will-change: auto;
+        }
+        
+        .lt-logo, .letter-l, .letter-t, .bar-cut {
+            will-change: transform;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+        }
+        
+        .particle {
+            will-change: transform;
+            transform: translateZ(0);
+        }
+        
+        button, .quantum-input {
+            will-change: transform;
+            transform: translateZ(0);
+        }
+        
+        table, tbody, tr, td {
+            will-change: contents;
+        }
+        
+        /* Smooth Scrolling */
+        html {
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Accessibility / Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+                scroll-behavior: auto !important;
+            }
+        }
+        
+        /* Enhanced Typography */
+        body {
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Professional Color Scheme - Red/Blue/Green Theme */
+        :root {
+            --main-color: #ff4757;
+            --main-color-dark: #ff3838;
+            --main-color-light: #ff6b7a;
+            --main-color-alpha-10: rgba(255, 71, 87, 0.1);
+            --main-color-alpha-20: rgba(255, 71, 87, 0.2);
+            --main-color-alpha-30: rgba(255, 71, 87, 0.3);
+            --main-color-alpha-50: rgba(255, 71, 87, 0.5);
+            --main-color-alpha-80: rgba(255, 71, 87, 0.8);
+            --blue-accent: #5352ed;
+            --green-accent: #2ed573;
+            --yellow-accent: #ffd782;
+            --white-bg: #ffffff;
+            --blue-bg: #0f2c4f;
+        }
+        
+        /* Enhanced Button Styles */
+        button {
+            background: linear-gradient(120deg, #1a1f2c, #30394c);
+            color: #f5f7fb;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        button:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+        }
+        
+        /* Enhanced Input Styles */
+        .quantum-input {
+            width: 100%;
+            padding: 16px 20px;
+            margin: 12px 0;
+            background: var(--white-bg);
+            border: 2px solid var(--main-color);
+            border-radius: 12px;
+            color: var(--main-color);
+            font-size: 16px;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+            transform: translateZ(0);
+        }
+        
+        .quantum-input:focus {
+            outline: none;
+            border-color: var(--main-color-dark);
+            box-shadow: 0 0 0 3px var(--main-color-alpha-20);
+            transform: scale(1.02) translateZ(0);
+        }
+        
+        .quantum-input::placeholder {
+            color: var(--main-color-alpha-50);
+            text-transform: none;
+            letter-spacing: 1px;
+        }
+        
+        /* Enhanced Status Styles */
+        /* Status - Always Hidden */
+        .status {
+            display: none !important;
+            visibility: hidden;
+        }
+        
+        .status.loading,
+        .status.success,
+        .status.error {
+            display: none !important;
+            visibility: hidden;
+        }
+        
+        /* Table Styles - No Box, Full Width */
+        table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 10px;
+            background: transparent;
+            border-radius: 0;
+            overflow: visible;
+            border: none;
+            box-shadow: none;
+        }
+        
+        thead {
+            background: transparent;
+            color: var(--white-bg);
+        }
+        
+        th {
+            padding: 8px 4px;
+            text-align: center;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.5rem;
+            border: none;
+            color: #ffffff;
+        }
+        
+        tbody tr {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(110, 203, 255, 0.2);
+            background: transparent;
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+        
+        tbody tr:nth-child(even) {
+            background: rgba(110, 203, 255, 0.05);
+        }
+        
+        tbody tr:hover {
+            background: rgba(110, 203, 255, 0.15);
+            transform: translateX(4px);
+            box-shadow: -4px 0 8px rgba(110, 203, 255, 0.2);
+        }
+        
+        td {
+            padding: 6px 4px;
+            border-bottom: 1px solid rgba(110, 203, 255, 0.2);
+            color: #ffffff;
+            word-break: break-word;
+            font-weight: 600;
+            font-size: 0.5rem;
+            text-align: center;
+        }
+        
+        /* Enhanced Loading Bar */
+        .loading-bar-container {
+            width: 100%;
+            height: 40px;
+            background: var(--main-color-alpha-10);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--main-color);
+            transform: translateZ(0);
+        }
+        
+        .loading-bar {
+            height: 100%;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            transform: translateZ(0);
+        }
+        
+        .loading-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        
+        @keyframes shimmer {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+        
+        .loading-bar.yellow {
+            background: linear-gradient(135deg, var(--yellow-accent) 0%, #FFC107 100%);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+        
+        .count-number {
+            position: relative;
+            z-index: 1;
+            color: white;
+            font-weight: 800;
+            font-size: 1.1rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Enhanced Timer Display with Glassmorphism */
+        .quantum-timer {
+            text-align: center;
+            margin: 20px 0;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 2px solid rgba(110, 203, 255, 0.5);
+            font-size: 1rem;
+            color: var(--main-color);
+            font-weight: 700;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transform: translateZ(0);
+            box-shadow: 0 4px 15px rgba(110, 203, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .quantum-timer:hover {
+            box-shadow: 0 6px 20px rgba(110, 203, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .quantum-timer-text {
+            color: var(--main-color);
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        
+        /* Enhanced Count Display - Box Removed */
+        .count-display {
+            background: transparent;
+            padding: 10px 0;
+            border: none;
+            box-shadow: none;
+            transform: translateZ(0);
+        }
+
+        .count-label {
+            color: var(--white-bg);
+            font-weight: 800;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        /* Premium Code Styling - Enhanced */
+        .premium-code {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #05070d, #161b28);
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #f4f6fb;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: inline-block;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+            transform: translateZ(0);
+        }
+        
+        /* Period Number Styling */
+        .period-number {
+            font-weight: 700;
+            color: #000000;
+            font-family: 'Courier New', monospace;
+        }
+        
+        /* Results Number Column - Black Color */
+        td.number-column {
+            color: #000000 !important;
+            font-weight: 700;
+        }
+        
+        /* Number column using nth-child selector */
+        tbody td:nth-child(3) {
+            color: #000000 !important;
+            font-weight: 700;
+        }
+        
+        /* Big/Small Result Colors */
+        .result-big {
+            color: var(--yellow-accent);
+            font-weight: 700;
+        }
+        
+        .result-small {
+            color: var(--main-color);
+            font-weight: 700;
+        }
+        
+        /* Smooth Transitions */
+        * {
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Touch Optimization */
+        @media (hover: none) and (pointer: coarse) {
+            button, .quantum-input, a {
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+            }
+        }
+
+        /* Premium Prediction Box with Glassmorphism - Red/Blue/Green Theme */
+        .prediction-box {
+            background: linear-gradient(135deg, rgba(13, 36, 66, 0.85), rgba(9, 24, 48, 0.92));
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 71, 87, 0.35);
+            padding: 22px 24px;
+            margin-bottom: 22px;
+            border-radius: 20px;
+            box-shadow: 0 10px 35px rgba(5, 13, 30, 0.65);
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prediction-box:hover {
+            box-shadow: 0 6px 25px rgba(255, 71, 87, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .prediction-title {
+            color: #e6f6ff;
+            font-weight: 800;
+            font-size: 1rem;
+            text-align: center;
+            margin-bottom: 16px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            text-shadow: 0 0 12px rgba(255, 71, 87, 0.55);
+        }
+
+        .prediction-row {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+            padding: 12px 4px;
+            width: 100%;
+            border-bottom: 1px solid rgba(255, 71, 87, 0.18);
+        }
+        
+        .prediction-row:first-of-type {
+            padding-top: 0;
+        }
+        
+        .prediction-row:last-child {
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .prediction-label {
+            color: rgba(213, 235, 255, 0.9);
+            font-weight: 700;
+            font-size: 0.72rem;
+            letter-spacing: 0.12em;
+            width: 100%;
+            display: block;
+            text-align: left;
+            text-transform: uppercase;
+        }
+        
+        .prediction-value,
+        .prediction-rate {
+            display: block;
+            width: 100%;
+            font-size: 0.95rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-align: left;
+        }
+
+        .prediction-value {
+            font-weight: 800;
+            color: var(--yellow-accent);
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 12px rgba(255, 215, 0, 0.55);
+        }
+        
+        /* Period number - always yellow */
+        #predPeriod,
+        #ckLotteryPredPeriod {
+            color: var(--yellow-accent) !important;
+        }
+        
+        /* Prediction result - BIG yellow, SMALL blue */
+        .prediction-value.big,
+        #predResult.big,
+        #ckLotteryPredResult.big {
+            color: var(--yellow-accent) !important;
+        }
+        
+        .prediction-value.small,
+        #predResult.small,
+        #ckLotteryPredResult.small {
+            color: #5352ed !important; /* Blue color */
+        }
+        
+        /* Prediction Rate Styling */
+        .prediction-rate {
+            font-weight: 800;
+            font-size: 0.88rem;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 10px rgba(110, 203, 255, 0.45);
+        }
+        
+        .prediction-rate.low {
+            color: #ff0000 !important; /* Red */
+        }
+        
+        .prediction-rate.medium {
+            color: #0066ff !important; /* Blue */
+        }
+        
+        .prediction-rate.high {
+            color: #00ff00 !important; /* Green */
+        }
+
+        /* Global TRX Prediction Panel */
+        .prediction-panel {
+            background: linear-gradient(135deg, rgba(10, 26, 52, 0.92), rgba(4, 12, 28, 0.95));
+            border: 1px solid rgba(110, 203, 255, 0.35);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 18px 38px rgba(2, 10, 24, 0.65);
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .prediction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .prediction-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .meta-chip {
+            padding: 4px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(110, 203, 255, 0.35);
+            color: rgba(224, 243, 255, 0.9);
+            font-size: 0.65rem;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .mode-tag {
+            padding: 8px 16px;
+            border-radius: 14px;
+            font-weight: 800;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            min-width: 110px;
+            text-align: center;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+        }
+
+        .mode-tag.win {
+            background: linear-gradient(120deg, #0dd07f, #009c68);
+        }
+
+        .mode-tag.lose {
+            background: linear-gradient(120deg, #ff4d4d, #c30030);
+        }
+
+        .mode-tag.neutral {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px dashed rgba(110, 203, 255, 0.4);
+            color: rgba(224, 243, 255, 0.8);
+        }
+
+        .outcome-tag {
+            font-size: 0.7rem;
+            letter-spacing: 0.4em;
+        }
+
+        .prediction-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 18px;
+        }
+
+        .prediction-cell {
+            border: 1px solid rgba(110, 203, 255, 0.25);
+            border-radius: 16px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 100px;
+        }
+
+        .prediction-footer {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .calc-note {
+            font-size: 0.76rem;
+            color: rgba(224, 243, 255, 0.85);
+            letter-spacing: 0.08em;
+        }
+
+        .calc-note strong {
+            color: var(--yellow-accent);
+        }
+
+        .hash-highlight,
+        .number-highlight {
+            position: relative;
+            padding-left: 14px;
+        }
+
+        .hash-highlight::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translate(-12px, -50%);
+            width: 0;
+            height: 0;
+            border-top: 7px solid transparent;
+            border-bottom: 7px solid transparent;
+            border-right: 10px solid #ff4d6d;
+            filter: drop-shadow(0 0 6px rgba(255, 77, 109, 0.6));
+        }
+
+        .number-highlight::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translate(-12px, -50%);
+            width: 0;
+            height: 0;
+            border-top: 7px solid transparent;
+            border-bottom: 7px solid transparent;
+            border-right: 10px solid #00d084;
+            filter: drop-shadow(0 0 6px rgba(0, 208, 132, 0.5));
+        }
+
+        /* Merged Stats Box with Glassmorphism */
+        .stats-merged {
+            background: rgba(7, 18, 38, 0.82);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(110, 203, 255, 0.2);
+            padding: 20px;
+            margin-bottom: 18px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(2, 12, 25, 0.55);
+            display: none;
+        }
+
+        .stats-row {
+            margin-bottom: 18px;
+        }
+
+        .stats-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .stats-label-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: rgba(231, 244, 255, 0.9);
+            font-weight: 700;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.35em;
+        }
+
+        /* Win/Lose Tags - Vibrant & Premium */
+        .win-tag {
+            background: linear-gradient(135deg, #00C853, #69F0AE);
+            color: #005005;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 6px rgba(0, 200, 83, 0.2);
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .lose-tag {
+            background: linear-gradient(135deg, #D50000, #FF5252);
+            color: #ffffff;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 6px rgba(213, 0, 0, 0.2);
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        
+        .pending-tag {
+            background: linear-gradient(135deg, #FFC107, #FFD54F);
+            color: #3E2723;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            opacity: 0.8;
+            box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+            display: inline-block;
+            min-width: 65px;
+            text-align: center;
+        }
+        
+        /* Navigation Buttons - Premium Floating Design */
+        .nav-button {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10003;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, rgba(110, 203, 255, 0.95) 0%, rgba(107, 182, 214, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 8px 25px rgba(110, 203, 255, 0.4), 0 0 20px rgba(110, 203, 255, 0.2);
+            min-width: 80px;
+        }
+        
+        .nav-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+            border-radius: 16px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .nav-button:hover {
+            background: linear-gradient(135deg, rgba(110, 203, 255, 1) 0%, rgba(107, 182, 214, 1) 100%);
+            transform: translateY(-50%) scale(1.08);
+            box-shadow: 0 12px 35px rgba(110, 203, 255, 0.6), 0 0 30px rgba(110, 203, 255, 0.4);
+        }
+        
+        .nav-button:hover::before {
+            opacity: 1;
+        }
+        
+        .nav-button:active {
+            transform: translateY(-50%) scale(1.02);
+        }
+        
+        .nav-button i {
+            font-size: 1.5rem;
+        }
+        
+        .nav-button-left {
+            left: 10px;
+        }
+        
+        .nav-button-right {
+            right: 10px;
+        }
+        
+        /* Ck Lottery Container - Matching Example Pattern */
+        .ck-lottery-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh; /* Dynamic viewport height for mobile browsers */
+            z-index: 998;
+            display: flex;
+            flex-direction: column;
+            background: transparent;
+            padding: 0;
+            box-sizing: border-box;
+            gap: 0;
+            overflow: hidden;
+            margin: 0;
+        }
+        
+        .ck-lottery-container #ckLotteryPredictionBox {
+            position: relative;
+            margin: 0;
+            z-index: 1001;
+            pointer-events: auto;
+            max-width: 520px;
+            width: calc(100% - 24px);
+            margin: 12px auto 0;
+            flex-shrink: 0;
+            border-radius: 0;
+            border-left: none;
+            border-right: none;
+            box-shadow: none;
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            border: none;
+        }
+
+        .ck-lottery-container #ckLotteryIframe {
+            position: relative;
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            overflow: auto;
+            background: white;
+            z-index: 1;
+            pointer-events: auto;
+            margin: 0;
+            padding: 0;
+            border-radius: 0;
+            box-shadow: none;
+        }
+        
+        /* Add padding to container to prevent content from being hidden behind menu */
+        .results-container {
+            padding-bottom: 70px;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-button {
+                padding: 12px 16px;
+                font-size: 0.65rem;
+                min-width: 70px;
+            }
+            
+            .nav-button i {
+                font-size: 1.3rem;
+            }
+            
+            .results-container {
+                padding-bottom: 0px;
+            }
+            
+            .ck-lottery-container {
+                height: 100vh;
+            }
+            
+            .ck-lottery-container #ckLotteryPredictionBox {
+                margin: 8px;
+            }
+            
+            table {
+                font-size: 0.45rem;
+            }
+            
+            th {
+                font-size: 0.45rem;
+                padding: 5px 3px;
+                color: #ffffff;
+            }
+            
+            td {
+                font-size: 0.45rem;
+                padding: 4px 3px;
+                color: #ffffff;
+            }
+            
+            .premium-code {
+                font-size: 0.43rem;
+                padding: 2px 4px;
+            }
+            
+            .win-tag, .lose-tag, .pending-tag {
+                font-size: 0.43rem;
+                padding: 2px 5px;
+                min-width: 40px;
+            }
+            
+            .period-number {
+                font-size: 0.45rem;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+    <!-- Intro Animation -->
+    <section id="introAnimation">
+        <div class="cosmic-bg" id="cosmicBg"></div>
+        <div class="intro-container">
+            <div class="logo-container">
+                <div class="lt-logo">
+                    <span class="letter-l">L</span><span class="letter-t">T</span>
+                </div>
+                <div class="logo-text-container">
+                    <div class="logo-text-main">Lottery Tricks Ai Perdition</div>
+                    <div class="logo-text-sub">Global TRX Mini V1.1</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quantum AI Key Unlock Gate -->
+    <section id="gate">
+        <div class="quantum-gate">
+            <h1 class="quantum-title">Lottery Tricks Ai Perdition</h1>
+            <input type="text" id="keyInput" class="quantum-input" placeholder="ENTER QUANTUM ACCESS KEY">
+            <button class="quantum-button" id="activateBtn">
+                <i class="fas fa-key"></i> ACTIVATE QUANTUM CORE
+            </button>
+            <div id="key-timer" class="quantum-timer" style="display: none;">
+                <div class="loader">
+                    <span class="hour"></span>
+                    <span class="min"></span>
+                    <span class="circel"></span>
+                </div>
+                <span class="quantum-timer-text" id="timerText"></span>
+            </div>
+            <div class="telegram-button-wrapper">
+                <a href="https://t.me/LotteryTricksAiPrediction" target="_blank" style="text-decoration: none;">
+                    <button class="button">
+                        <div class="icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-telegram" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.287 5.906c-.778.324-2.334.994-4.666 2.01-.378.15-.577.298-.595.442-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294.26.006.549-.1.868-.32 2.179-1.471 3.304-2.214 3.374-2.23.05-.012.12-.026.166.016.047.041.042.12.037.141-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8.154 8.154 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629.093.06.183.125.27.187.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.426 1.426 0 0 0-.013-.315.337.337 0 0 0-.114-.217.526.526 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09z"></path>
+                            </svg>
+                        </div>
+                        <p>Telegram Channel</p>
+                    </button>
+                </a>
+            </div>
+            <div id="key-content" class="quantum-success">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3 style="margin-bottom: 8px; color: #6ecbff; font-size: 1rem;">QUANTUM ACCESS GRANTED</h3>
+                <p style="color: #6ecbff; margin-bottom: 12px; font-size: 0.75rem;">Neural network initialized successfully</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Container -->
+    <div class="container results-container" id="resultsContainer">
+        <h1>Lottery Tricks Ai Perdition</h1>
+        <div class="title-subtitle">
+            <span>Global TRX Mini V1.1</span>
+        </div>
+        <p class="subtitle">
+            <span class="realtime-indicator">● LIVE</span>
+            Live - DataBase
+        </p>
+
+        <div id="status" class="status" style="display: none;"></div>
+
+        <!-- Prediction Box -->
+        <div id="predictionBox" class="prediction-box">
+            <div class="prediction-title">Global TRX</div>
+            <div class="prediction-row">
+                <span class="prediction-label">Period</span>
+                <span id="predPeriod" class="prediction-value">-</span>
+            </div>
+            <div class="prediction-row">
+                <span class="prediction-label">Prediction</span>
+                <span id="predResult" class="prediction-value">-</span>
+            </div>
+            <div class="prediction-row">
+                <span class="prediction-label">Rate</span>
+                <span id="predRate" class="prediction-rate">-</span>
+            </div>
+        </div>
+
+        <!-- Merged Stats Box -->
+        <div id="mergedStats" class="stats-merged">
+            <div class="stats-row">
+                <div class="stats-label-row">
+                    <span>BIG Count</span>
+                    <span id="bigCount">0</span>
+                </div>
+                <div class="loading-bar-container">
+                    <div class="loading-bar yellow" id="bigCountBar"></div>
+                </div>
+            </div>
+            
+            <div class="stats-row">
+                <div class="stats-label-row">
+                    <span>SMALL Count</span>
+                    <span id="smallCount">0</span>
+                </div>
+                <div class="loading-bar-container">
+                    <div class="loading-bar yellow" id="smallCountBar"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="resultsTable"></div>
+        <div id="lastUpdate" class="last-update" style="display: none;"></div>
+    </div>
+
+    <script>
+        // ========== INTRO ANIMATION CONTROL ==========
+        function createCosmicParticles() {
+            const cosmicBg = document.getElementById('cosmicBg');
+            const particleCount = 40; // More particles for premium effect
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (8 + Math.random() * 8) + 's';
+                // Add random 3D depth
+                const depth = Math.random() * 300;
+                particle.style.transform = `translateZ(${depth}px)`;
+                cosmicBg.appendChild(particle);
+            }
+        }
+        
+        function startIntroAnimation() {
+            createCosmicParticles();
+            
+            setTimeout(() => {
+                const introEl = document.getElementById('introAnimation');
+                if (!introEl) return;
+                introEl.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    introEl.style.display = 'none';
+                    document.getElementById('gate').style.display = 'block';
+                    initializeAfterIntro();
+                }, 700);
+            }, 2300);
+        }
+        
+        function initializeAfterIntro() {
+            // Set up unlock button handler
+            document.getElementById("activateBtn").addEventListener("click", activateKey);
+            document.getElementById("keyInput").addEventListener("keyup", (e) => { if (e.key === "Enter") activateKey(); });
+            
+            // Initialize login Firebase first to get server time offset
+            if (initializeLoginFirebase()) {
+                // Wait a bit for server offset to be retrieved
+                setTimeout(() => {
+                    // Check if already unlocked using server time
+                    if (expireTime && getServerTime() < expireTime && activatedKeyId) {
+                        startSession();
+                        startKeyMonitoring(activatedKeyId);
+                    } else {
+                        // Show gate if not unlocked
+                        document.getElementById("gate").style.display = "block";
+                        document.getElementById("resultsContainer").classList.remove("unlocked");
+                        // Clear invalid stored data
+                        if (!expireTime || !activatedKeyId) {
+                            localStorage.removeItem('expireTime');
+                            localStorage.removeItem('activatedKeyId');
+                        }
+                    }
+                    
+                    // Initialize results Firebase
+                    if (initializeFirebase()) {
+                        // Initialize prediction Firebase
+                        initializePredictionFirebase();
+                        
+                        // Only auto-connect if unlocked
+                        if (expireTime && getServerTime() < expireTime && activatedKeyId) {
+                            setTimeout(() => {
+                                connectFirebase();
+                                connectPredictionFirebase();
+                            }, 500);
+                        }
+                    }
+                }, 500);
+            } else {
+                // If login Firebase fails, show gate
+                document.getElementById("gate").style.display = "block";
+                document.getElementById("resultsContainer").classList.remove("unlocked");
+            }
+        }
+        
+        // ========== QUANTUM AI KEY UNLOCK FUNCTIONALITY ==========
+        // Firebase configs for key validation - check multiple projects
+        const loginConfigCkAdm = {
+            apiKey: "AIzaSyAy3QvFmhKiOX38MZiINfZq2yYXGhb7uL8",
+            authDomain: "ck-adm.firebaseapp.com",
+            databaseURL: "https://ck-adm-default-rtdb.europe-west1.firebasedatabase.app/",
+            projectId: "ck-adm",
+            storageBucket: "ck-adm.appspot.com",
+            messagingSenderId: "192822942347",
+            appId: "1:192822942347:web:f27eee393e16c84544528e"
+        };
+        
+        const loginConfigLotteryoo = {
+            apiKey: "AIzaSyBynBT5W_C6rNVEUB4j7ABiJQeSfQGU4Mo",
+            authDomain: "lotteryoo.firebaseapp.com",
+            databaseURL: "https://lotteryoo-default-rtdb.europe-west1.firebasedatabase.app/",
+            projectId: "lotteryoo",
+            storageBucket: "lotteryoo.firebasestorage.app",
+            messagingSenderId: "72782915477",
+            appId: "1:72782915477:web:011fc0a614aff7c666b89c",
+            measurementId: "G-M06SN8YLD3"
+        };
+        
+        let loginAppCkAdm = null;
+        let loginDbCkAdm = null;
+        let loginAppLotteryoo = null;
+        let loginDbLotteryoo = null;
+        let serverOffset = 0;
+        let expireTime = parseInt(localStorage.getItem('expireTime')) || 0;
+        let activatedKeyId = localStorage.getItem('activatedKeyId') || null;
+        let timerInterval = null;
+        let keyStatusListener = null;
+        let currentLoginDb = null;
+        
+        // Get server time (to prevent client time manipulation)
+        const getServerTime = () => Date.now() + serverOffset;
+        
+        function initializeLoginFirebase() {
+            try {
+                // Initialize CK-ADM Firebase (for CK and 6Wingo keys)
+                loginAppCkAdm = firebase.initializeApp(loginConfigCkAdm, 'loginCkAdm');
+                loginDbCkAdm = loginAppCkAdm.database();
+                
+                // Initialize Lotteryoo Firebase (for BigWin keys)
+                loginAppLotteryoo = firebase.initializeApp(loginConfigLotteryoo, 'loginLotteryoo');
+                loginDbLotteryoo = loginAppLotteryoo.database();
+                
+                // Get server time offset from CK-ADM (both use same offset concept)
+                loginDbCkAdm.ref(".info/serverTimeOffset").on("value", snapshot => {
+                    serverOffset = snapshot?.val() || 0;
+                });
+                return true;
+            } catch (error) {
+                console.error('Login Firebase init error:', error);
+                return false;
+            }
+        }
+        
+        function activateKey() {
+            const key = document.getElementById('keyInput').value.trim().toUpperCase();
+            if (!key) {
+                alert("Please enter a quantum access key");
+                return;
+            }
+            
+            const btn = document.getElementById('activateBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> VERIFYING...';
+            btn.disabled = true;
+            
+            if (!loginDbCkAdm || !loginDbLotteryoo) {
+                if (!initializeLoginFirebase()) {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    alert("Failed to initialize quantum network");
+                    return;
+                }
+            }
+            
+            // Check key in both Firebase projects - accept all key types (ck, bigwin, 6wingo)
+            const checkCkAdm = loginDbCkAdm.ref('keys/' + key).once('value');
+            const checkLotteryoo = loginDbLotteryoo.ref('keys/' + key).once('value');
+            
+            Promise.all([checkCkAdm, checkLotteryoo]).then(([ckAdmSnapshot, lotteryooSnapshot]) => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                
+                let keyData = null;
+                let keyDb = null;
+                
+                // Check CK-ADM first (for CK and 6Wingo keys)
+                if (ckAdmSnapshot.exists()) {
+                    const data = ckAdmSnapshot.val();
+                    // Accept CK and 6Wingo keys
+                    if (data.keyType === "ck" || data.keyType === "6wingo") {
+                        keyData = data;
+                        keyDb = loginDbCkAdm;
+                    }
+                }
+                
+                // Check Lotteryoo (for BigWin keys)
+                if (!keyData && lotteryooSnapshot.exists()) {
+                    const data = lotteryooSnapshot.val();
+                    // Accept BigWin keys
+                    if (data.keyType === "bigwin") {
+                        keyData = data;
+                        keyDb = loginDbLotteryoo;
+                    }
+                }
+                
+                if (keyData && keyDb) {
+                    if (keyData.used) {
+                        alert("This quantum key has already been used!");
+                        return;
+                    }
+                    
+                    const extraTime = keyData.duration * 60 * 1000;
+                    // Use server time to prevent manipulation
+                    const currentServerTime = getServerTime();
+                    expireTime = Math.max(currentServerTime, expireTime) + extraTime;
+                    localStorage.setItem('expireTime', expireTime);
+                    
+                    // Store server timestamp when key is activated
+                    keyDb.ref('keys/' + key).update({ 
+                        used: true,
+                        activatedAt: firebase.database.ServerValue.TIMESTAMP,
+                        expiresAt: expireTime
+                    });
+                    
+                    // Store activated key ID for monitoring
+                    activatedKeyId = key;
+                    localStorage.setItem('activatedKeyId', key);
+                    currentLoginDb = keyDb;
+                    
+                    document.getElementById('key-content').style.display = 'block';
+                    alert(`Quantum Access Activated! Added ${keyData.duration} minutes`);
+                    document.getElementById('keyInput').value = '';
+                    startSession();
+                    startKeyMonitoring(key, keyDb);
+                } else {
+                    alert("Invalid Quantum Key or Key Type Not Supported");
+                }
+            }).catch(error => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                alert("Quantum Network Error. Please try again.");
+                console.error(error);
+            });
+        }
+        
+        function startSession() {
+            if (timerInterval) clearInterval(timerInterval);
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+        
+        function updateTimer() {
+            // Use server time to prevent client time manipulation
+            const serverTime = getServerTime();
+            const remaining = expireTime - serverTime;
+            const gate = document.getElementById("gate");
+            const resultsContainer = document.getElementById("resultsContainer");
+            const timerEl = document.getElementById('key-timer');
+            
+            if (remaining <= 0) {
+                clearInterval(timerInterval);
+                if (timerEl) timerEl.textContent = "Quantum Access Expired";
+                document.getElementById('key-content').style.display = 'none';
+                gate.style.display = "block";
+                resultsContainer.classList.remove("unlocked");
+                localStorage.removeItem('expireTime');
+                localStorage.removeItem('activatedKeyId');
+                activatedKeyId = null;
+                if (firebaseListener && db) {
+                    db.ref(FIREBASE_PATH).off('value', firebaseListener);
+                    firebaseListener = null;
+                }
+                if (keyStatusListener && currentLoginDb && activatedKeyId) {
+                    currentLoginDb.ref('keys/' + activatedKeyId).off('value', keyStatusListener);
+                    keyStatusListener = null;
+                }
+                return;
+            }
+            
+            const hours = Math.floor(remaining / (1000 * 60 * 60));
+            const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+            
+            const timeText = `${hours}h ${minutes}m ${seconds}s`;
+            const timerTextEl = document.getElementById('timerText');
+            if (timerTextEl) {
+                timerTextEl.textContent = timeText;
+            }
+            if (timerEl) {
+                timerEl.style.display = 'flex';
+            }
+            
+            gate.style.display = "none";
+            resultsContainer.classList.add("unlocked");
+            
+            if (db && !firebaseListener) {
+                setTimeout(() => {
+                    connectFirebase();
+                    connectPredictionFirebase();
+                }, 500);
+            }
+        }
+        
+        // Monitor key status in Firebase for deactivation
+        function startKeyMonitoring(keyId, keyDb) {
+            if (!keyDb || !keyId) return;
+            currentLoginDb = keyDb;
+            
+            // Remove existing listener if any
+            if (keyStatusListener && activatedKeyId && currentLoginDb) {
+                currentLoginDb.ref('keys/' + activatedKeyId).off('value', keyStatusListener);
+            }
+            
+            // Listen for key status changes
+            keyStatusListener = keyDb.ref('keys/' + keyId).on('value', (snapshot) => {
+                if (!snapshot.exists()) {
+                    // Key was deleted
+                    redirectToUnlock("Key has been deleted");
+                    return;
+                }
+                
+                const keyData = snapshot.val();
+                
+                // Check if key was reset to not active (used=false and claimed=false)
+                if (keyData.used === false && keyData.claimed === false && keyId === activatedKeyId) {
+                    // Key was deactivated
+                    redirectToUnlock("Key has been deactivated by admin");
+                    return;
+                }
+            });
+        }
+        
+        function redirectToUnlock(reason) {
+            // Stop all timers and listeners
+            if (timerInterval) clearInterval(timerInterval);
+            if (keyStatusListener && currentLoginDb && activatedKeyId) {
+                currentLoginDb.ref('keys/' + activatedKeyId).off('value', keyStatusListener);
+            }
+            if (firebaseListener && db) {
+                db.ref(FIREBASE_PATH).off('value', firebaseListener);
+            }
+            
+            // Clear storage
+            localStorage.removeItem('expireTime');
+            localStorage.removeItem('activatedKeyId');
+            expireTime = 0;
+            activatedKeyId = null;
+            
+            // Show alert and redirect
+            alert(`❌ ${reason || "Session expired"}. Redirecting to unlock page...`);
+            
+            const gate = document.getElementById("gate");
+            const resultsContainer = document.getElementById("resultsContainer");
+            
+            gate.style.display = "block";
+            resultsContainer.classList.remove("unlocked");
+            document.getElementById('key-content').style.display = 'none';
+        }
+        
+        // ========== RESULTS FIREBASE CONFIGURATION ==========
+        const firebaseConfig = {
+            apiKey: "AIzaSyDj6z3O91NnlQ1zVdripiGhqQMsQhR4_ak",
+            authDomain: "ck30-35e97.firebaseapp.com",
+            databaseURL: "https://ck30-35e97-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "ck30-35e97",
+            storageBucket: "ck30-35e97.appspot.com",
+            messagingSenderId: "625630152314",
+            appId: "1:625630152314:web:c035009eec389371b51dc3",
+            measurementId: "G-6Z7DYPKHR2"
+        };
+
+        const FIREBASE_PATH = "globaltrx/default";
+        
+        // Firebase Realtime Database config for predictions (same as Mini1-1.js uses)
+        const PREDICTION_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyBMRKbOavHAQTbufOjcAbnSxZH89-SeGek",
+            authDomain: "chackchack-d7445.firebaseapp.com",
+            databaseURL: "https://chackchack-d7445-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "chackchack-d7445",
+            storageBucket: "chackchack-d7445.firebasestorage.app",
+            messagingSenderId: "533782546151",
+            appId: "1:533782546151:web:13050e49252ca127388442"
+        };
+        
+        const PREDICTION_CHANNEL_KEY = 'GLOBALTRXMINI1_HTML';
+
+        let db = null;
+        let currentResults = [];
+        let firebaseListener = null;
+        let predictionDb = null;
+        let predictionFirebaseApp = null;
+        let predictionListener = null;
+
+        // Initialize Firebase
+        function initializeFirebase() {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                return true;
+            } catch (error) {
+                console.error('Firebase initialization error:', error);
+                showStatus(`❌ Firebase initialization failed: ${error.message}`, 'error');
+                return false;
+            }
+        }
+        
+        // Initialize Prediction Firebase (for reading predictions from Mini1-1.js)
+        function initializePredictionFirebase() {
+            try {
+                if (typeof firebase === 'undefined') {
+                    console.error('❌ Firebase SDK not loaded for predictions');
+                    return false;
+                }
+
+                if (predictionDb) {
+                    return true;
+                }
+
+                if (!predictionFirebaseApp) {
+                    if (firebase.apps && firebase.apps.length) {
+                        for (let i = 0; i < firebase.apps.length; i++) {
+                            if (firebase.apps[i].name === 'globaltrxPrediction') {
+                                predictionFirebaseApp = firebase.apps[i];
+                                break;
+                            }
+                        }
+                    }
+                    if (!predictionFirebaseApp) {
+                        predictionFirebaseApp = firebase.initializeApp(PREDICTION_FIREBASE_CONFIG, 'globaltrxPrediction');
+                    }
+                }
+
+                predictionDb = predictionFirebaseApp.database();
+                return true;
+            } catch (error) {
+                console.error('❌ Prediction Firebase init failed:', error);
+                return false;
+            }
+        }
+        
+        // Connect to Firebase Realtime Database to read predictions
+        function connectPredictionFirebase() {
+            if (!predictionDb) {
+                if (!initializePredictionFirebase()) {
+                    console.warn('⚠️ Prediction Firebase not ready, cannot read predictions.');
+                    return;
+                }
+            }
+
+            try {
+                // Remove existing listener if any
+                if (predictionListener && predictionDb) {
+                    predictionDb.ref('predictions/' + PREDICTION_CHANNEL_KEY).off('value', predictionListener);
+                    predictionListener = null;
+                }
+
+                // Set up real-time listener for predictions
+                predictionListener = predictionDb.ref('predictions/' + PREDICTION_CHANNEL_KEY).on('value', (snapshot) => {
+                    const predictionData = snapshot.val();
+                    
+                    if (predictionData && predictionData.period && predictionData.predictionValue) {
+                        // Update prediction box with data from Firebase
+                        setPredictionDisplay(
+                            predictionData.period || '-',
+                            predictionData.predictionValue || null,
+                            predictionData.rate || null
+                        );
+                        togglePredictionBox(true);
+                    } else {
+                        // No prediction data from Firebase, use client-side calculation
+                        // This will be handled by updatePredictionPanel in updateStats
+                    }
+                }, (error) => {
+                    console.error('❌ Prediction Firebase read error:', error);
+                });
+            } catch (error) {
+                console.error('❌ Error connecting to Prediction Firebase:', error);
+            }
+        }
+
+
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            statusEl.style.display = 'flex';
+        }
+
+        function hideStatus() {
+            document.getElementById('status').style.display = 'none';
+        }
+
+        function classifyBigSmall(number) {
+            if (number === null || number === undefined) return null;
+            const num = parseInt(number);
+            if (isNaN(num)) return null;
+            return num >= 5 ? 'BIG' : 'SMALL';
+        }
+
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return '-';
+            try {
+                const date = new Date(timestamp);
+                return date.toLocaleString();
+            } catch (e) {
+                return timestamp;
+            }
+        }
+
+        // Simple prediction calculation (Ck BigWin 6 style)
+        function calculatePrediction(historyData) {
+            if (!historyData || historyData.length < 2) return null;
+            
+            const window = historyData.slice(0, Math.min(5, historyData.length));
+            let big = 0;
+            let small = 0;
+            
+            window.forEach((item) => {
+                const value = classifyBigSmall(item.number);
+                if (value === 'BIG') big += 1;
+                else if (value === 'SMALL') small += 1;
+            });
+            
+            if (big === small) return null;
+            
+            // Reverse strategy: if majority is BIG, predict SMALL (and vice versa)
+            if (big >= small) {
+                return 'SMALL';
+            } else {
+                return 'BIG';
+            }
+        }
+        
+        // Calculate Rate based on last 3 predictions accuracy
+        function calculateRate(historyData) {
+            if (!historyData || historyData.length < 6) return null;
+            
+            let correctCount = 0;
+            let totalChecked = 0;
+            
+            // Check last 3 predictions
+            for (let i = 0; i < 3 && i + 5 < historyData.length; i++) {
+                const historyForPrediction = historyData.slice(i + 1);
+                const predictedValue = calculatePrediction(historyForPrediction);
+                const actualResult = historyData[i];
+                const actualBigSmall = classifyBigSmall(actualResult.number);
+                
+                if (predictedValue && actualBigSmall) {
+                    if (predictedValue === actualBigSmall) {
+                        correctCount++;
+                    }
+                    totalChecked++;
+                }
+            }
+            
+            if (totalChecked === 0) return null;
+            
+            const accuracyRate = (correctCount / totalChecked) * 100;
+            
+            if (accuracyRate < 33) {
+                return 'Low';
+            } else if (accuracyRate <= 66) {
+                return 'Medium';
+            } else {
+                return 'High';
+            }
+        }
+
+        function calculateRateFromNumber(number) {
+            if (number === null || number === undefined) return null;
+            const num = parseInt(number, 10);
+            if (Number.isNaN(num)) return null;
+            const lastDigit = Math.abs(num) % 10;
+            return (lastDigit === 5 || lastDigit === 0) ? 'Low' : 'Medium';
+        }
+
+        // Simple prediction calculation (Ck BigWin 6 style - no complex logic)
+        function computeGlobalPredictionDetails(historyData) {
+            if (!historyData || historyData.length < 1) return null;
+
+            const latest = historyData[0];
+            
+            // Calculate period
+            const periodSource = (latest.period ?? latest.issueNumber ?? latest.periodNumber ?? '').toString();
+            const shortCurrent = parseInt(periodSource.slice(-3), 10);
+            const nextShort = Number.isNaN(shortCurrent)
+                ? '-'
+                : String(shortCurrent + 1).padStart(3, '0').slice(-3);
+
+            // Simple prediction: Check last 5 results, reverse strategy
+            const prediction = calculatePrediction(historyData);
+            
+            return {
+                nextPeriod: nextShort,
+                finalPrediction: prediction,
+            };
+        }
+
+        function togglePredictionBox(hasData) {
+            const predictionBox = document.getElementById('predictionBox');
+            if (predictionBox) {
+                predictionBox.style.display = hasData ? 'block' : 'none';
+            }
+        }
+        
+        function setPredictionDisplay(periodValue, predictionValue, rateValue) {
+            const normalizedPeriod = periodValue ?? '-';
+            const normalizedPrediction = predictionValue ? predictionValue.toUpperCase() : '-';
+            const normalizedRateText = rateValue ?? '-';
+            const normalizedRateClass = rateValue ? rateValue.toLowerCase() : null;
+            
+            const periodEl = document.getElementById('predPeriod');
+            const resultEl = document.getElementById('predResult');
+            const rateEl = document.getElementById('predRate');
+            
+            if (periodEl) periodEl.textContent = normalizedPeriod;
+            
+            if (resultEl) {
+                resultEl.textContent = normalizedPrediction;
+                resultEl.classList.remove('big', 'small');
+                if (predictionValue) {
+                    resultEl.classList.add(normalizedPrediction === 'BIG' ? 'big' : 'small');
+                }
+            }
+            
+            if (rateEl) {
+                rateEl.textContent = normalizedRateText;
+                rateEl.classList.remove('low', 'medium', 'high');
+                if (normalizedRateClass) {
+                    rateEl.classList.add(normalizedRateClass);
+                }
+            }
+        }
+        
+        function updatePredictionPanel(historyData) {
+            // If prediction data comes from Firebase Realtime Database (Mini1-1.js),
+            // it will be handled by connectPredictionFirebase() listener
+            // This function serves as fallback for client-side calculation
+            
+            const details = computeGlobalPredictionDetails(historyData);
+            
+            if (!details || !historyData || historyData.length === 0) {
+                // Only set empty if we don't have prediction from Firebase
+                if (!predictionListener) {
+                    setPredictionDisplay('-', '-', '-');
+                    togglePredictionBox(false);
+                }
+                return;
+            }
+            
+            // Get period, prediction, and rate (fallback calculation)
+            const period = details.nextPeriod || '-';
+            const prediction = details.finalPrediction || null;
+            
+            // Calculate Rate based on prediction accuracy (last 3 predictions)
+            let rate = null;
+            if (historyData && historyData.length >= 6) {
+                rate = calculateRate(historyData);
+            } else if (historyData && historyData.length > 0) {
+                // Fallback: use latest number for rate if not enough history
+                const latestNumber = historyData[0].number;
+                rate = calculateRateFromNumber(latestNumber);
+            }
+            
+            // Only update if we don't have Firebase prediction data
+            // Firebase prediction will override this via connectPredictionFirebase()
+            if (!predictionListener) {
+                setPredictionDisplay(period, prediction, rate);
+                togglePredictionBox(true);
+            }
+        }
+
+        function computeRowOutcome(results, index) {
+            if (!results || index === undefined || index === null) return null;
+            const historySlice = results.slice(index + 1);
+            if (historySlice.length < 2) return null;
+            const actual = classifyBigSmall(results[index].number);
+            const details = computeGlobalPredictionDetails(historySlice);
+            if (!actual || !details || !details.finalPrediction) return null;
+            return details.finalPrediction === actual ? 'WIN' : 'LOSE';
+        }
+
+        function updateStats(results) {
+            const statsBox = document.getElementById('mergedStats');
+            if (!results || results.length === 0) {
+                if (statsBox) statsBox.style.display = 'none';
+                updatePredictionPanel(null);
+                return;
+            }
+
+            const bigCount = results.filter(r => classifyBigSmall(r.number) === 'BIG').length;
+            const smallCount = results.filter(r => classifyBigSmall(r.number) === 'SMALL').length;
+
+            document.getElementById('bigCount').textContent = bigCount;
+            document.getElementById('smallCount').textContent = smallCount;
+            
+            const maxCount = Math.max(bigCount, smallCount, 1);
+            document.getElementById('bigCountBar').style.width = ((bigCount / maxCount) * 100) + '%';
+            document.getElementById('smallCountBar').style.width = ((smallCount / maxCount) * 100) + '%';
+            
+            if (statsBox) {
+                statsBox.style.display = 'block';
+            }
+
+            updatePredictionPanel(results);
+        }
+
+        function updateLastUpdateTime(timestamp) {
+            const lastUpdateEl = document.getElementById('lastUpdate');
+            if (timestamp) {
+                const date = new Date(timestamp);
+                lastUpdateEl.textContent = `Last updated: ${date.toLocaleString()}`;
+                lastUpdateEl.style.display = 'block';
+            } else {
+                lastUpdateEl.style.display = 'none';
+            }
+        }
+
+        function renderTable(results) {
+            const tableContainer = document.getElementById('resultsTable');
+            
+            if (!results || results.length === 0) {
+                tableContainer.innerHTML = `
+                    <div class="no-data">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                        <p>No results data available</p>
+                        <p style="font-size: 12px; margin-top: 10px;">Waiting for data from Firebase...</p>
+                    </div>
+                `;
+                updateStats([]);
+                return;
+            }
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Period</th>
+                            <th>Hash Value</th>
+                            <th>Number</th>
+                            <th>BIG/SMALL</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            results.forEach((result, index) => {
+                const bigSmall = classifyBigSmall(result.number);
+                const hashValue = (result.hashValue || result.blockHashtag || result.HashValue || '-').toString();
+                const periodRaw = (result.period ?? result.issueNumber ?? result.periodNumber ?? '-').toString();
+                const periodNumber = periodRaw.length > 5 ? periodRaw.slice(-5) : periodRaw;
+                const numberClass = index === 1 ? 'number-column number-highlight' : 'number-column';
+                const bigSmallClass = bigSmall === 'BIG' ? 'result-big' : bigSmall === 'SMALL' ? 'result-small' : '';
+                const hashClass = index === 0 ? 'hash-highlight' : '';
+
+                let resultHtml = '<span class="pending-tag">-</span>';
+                const outcome = computeRowOutcome(results, index);
+                if (outcome === 'WIN') {
+                        resultHtml = '<span class="win-tag">WIN</span>';
+                } else if (outcome === 'LOSE') {
+                        resultHtml = '<span class="lose-tag">LOSE</span>';
+                }
+                
+                html += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td class="period-number">${periodNumber}</td>
+                        <td class="${hashClass}">${hashValue || '-'}</td>
+                        <td class="${numberClass}">${result.number !== null && result.number !== undefined ? result.number : '-'}</td>
+                        <td class="${bigSmallClass}">${bigSmall || '-'}</td>
+                        <td>${resultHtml}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            tableContainer.innerHTML = html;
+            updateStats(results);
+        }
+
+        function connectFirebase() {
+            if (!db) {
+                if (!initializeFirebase()) {
+                    return;
+                }
+            }
+
+            // Status message hidden
+            // showStatus('Connecting to Firebase Realtime Database...', 'loading');
+
+            try {
+                // Remove existing listener if any
+                if (firebaseListener) {
+                    db.ref(FIREBASE_PATH).off('value', firebaseListener);
+                    firebaseListener = null;
+                }
+
+                // Set up real-time listener
+                firebaseListener = db.ref(FIREBASE_PATH).on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    
+                    if (data && data.list && Array.isArray(data.list)) {
+                        currentResults = data.list;
+                        renderTable(currentResults);
+                        updateLastUpdateTime(data.publishedAt || Date.now());
+                        // Status message hidden - removed showStatus
+                        // showStatus(`✅ Connected - ${currentResults.length} results loaded`, 'success');
+                    } else {
+                        // Status message hidden
+                        // showStatus('⚠️ No data found in Firebase. Waiting for data...', 'loading');
+                        renderTable([]);
+                    }
+                }, (error) => {
+                    console.error('Firebase read error:', error);
+                    // Status message hidden
+                    // showStatus(`❌ Firebase Error: ${error.message}`, 'error');
+                });
+            } catch (error) {
+                console.error('Error connecting to Firebase:', error);
+                // Status message hidden
+                // showStatus(`❌ Connection Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            startIntroAnimation();
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (firebaseListener && db) {
+                db.ref(FIREBASE_PATH).off('value', firebaseListener);
+            }
+            if (predictionListener && predictionDb) {
+                predictionDb.ref('predictions/' + PREDICTION_CHANNEL_KEY).off('value', predictionListener);
+            }
+        });
+    </script>
+</body>
+</html>
+
