@@ -49,7 +49,7 @@
         .results-container h1 {
             color: #000000;
         }
-        
+
         h1 {
             color: #e3e7ef;
             text-align: center;
@@ -467,7 +467,7 @@
                 radial-gradient(circle at 80% 70%, rgba(45, 116, 255, 0.2) 0%, transparent 50%),
                 radial-gradient(circle at 50% 50%, rgba(70, 160, 255, 0.18) 0%, transparent 70%);
         }
-        
+
         .particle {
             display: none;
         }
@@ -2602,17 +2602,50 @@
             // Listen for key status changes
             keyStatusListener = keyDb.ref('keys/' + keyId).on('value', (snapshot) => {
                 if (!snapshot.exists()) {
-                    // Key was deleted
-                    redirectToUnlock("Key has been deleted");
+                    // Key was deleted from Firebase - check local expiration time first
+                    const remaining = expireTime - getServerTime();
+                    if (remaining > 0) {
+                        // Key deleted but local time still valid - keep access until local time expires
+                        // Don't redirect, let the timer handle expiration
+                        return;
+                    } else {
+                        // Key deleted and expired - normal expiration
+                        redirectToUnlock("Session expired");
+                    }
                     return;
                 }
                 
                 const keyData = snapshot.val();
                 
-                // Check if key was reset to not active (used=false and claimed=false)
+                // If key is activated (used=true), check only expiration time
+                // Key should remain valid until expiration, regardless of other flags
+                if (keyData.used === true) {
+                    // Check local expiration time (more reliable than Firebase timestamp)
+                    const remaining = expireTime - getServerTime();
+                    if (remaining <= 0) {
+                        redirectToUnlock("Session expired");
+                        return;
+                    }
+                    
+                    // Also check Firebase expiration if exists
+                    if (keyData.expiresAt && keyData.expiresAt < getServerTime()) {
+                        redirectToUnlock("Key has expired");
+                        return;
+                    }
+                    
+                    // Key is still valid - do nothing
+                    return;
+                }
+                
+                // If key is not activated (used=false), check if it was deactivated
+                // Only redirect if key was reset to inactive state after being activated
                 if (keyData.used === false && keyData.claimed === false && keyId === activatedKeyId) {
-                    // Key was deactivated
-                    redirectToUnlock("Key has been deactivated by admin");
+                    // Key was reset/deactivated by admin before expiration
+                    const remaining = expireTime - getServerTime();
+                    if (remaining > 0) {
+                        // Still has time but key was deactivated
+                        redirectToUnlock("Key has been deactivated by admin");
+                    }
                     return;
                 }
             });
