@@ -730,7 +730,7 @@
             inset: 0;
             z-index: 9999;
             overflow-x: hidden;
-            overflow-y: auto;
+            overflow-y: hidden;
             background: #03183c;
             background-image: 
                 radial-gradient(circle at 20% 20%, rgba(255, 71, 87, 0.35), transparent 45%),
@@ -765,7 +765,10 @@
             flex-direction: column;
             gap: 18px;
             text-align: center;
-            position: relative;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             overflow: hidden;
         }
         
@@ -3037,10 +3040,19 @@
             }
         }
 
-        function renderTable(results) {
+        // V1.2-style incremental history
+        let displayedHistory = [];
+        let lastSeenLatestPeriodKey = null;
+
+        function getPeriodKey(r) {
+            const v = r.period ?? r.issueNumber ?? r.issue ?? r.periodNumber ?? '';
+            return String(v);
+        }
+
+        function renderTable(fullResults, historyResults) {
             const tableContainer = document.getElementById('resultsTable');
             
-            if (!results || results.length === 0) {
+            if (!fullResults || fullResults.length === 0) {
                 tableContainer.innerHTML = `
                     <div class="no-data">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -3051,6 +3063,20 @@
                     </div>
                 `;
                 updateStats([]);
+                displayedHistory = [];
+                lastSeenLatestPeriodKey = null;
+                return;
+            }
+
+            updateStats(fullResults);
+
+            const toShow = historyResults || [];
+            if (toShow.length === 0) {
+                tableContainer.innerHTML = `
+                    <div class="no-data">
+                        <p>Waiting for next period...</p>
+                    </div>
+                `;
                 return;
             }
 
@@ -3069,7 +3095,7 @@
                     <tbody>
             `;
 
-            results.forEach((result, index) => {
+            toShow.forEach((result, index) => {
                 const bigSmall = classifyBigSmall(result.number);
                 const hashValue = (result.hashValue || result.blockHashtag || result.HashValue || '-').toString();
                 const periodRaw = (result.period ?? result.issueNumber ?? result.periodNumber ?? '-').toString();
@@ -3078,12 +3104,13 @@
                 const bigSmallClass = bigSmall === 'BIG' ? 'result-big' : bigSmall === 'SMALL' ? 'result-small' : '';
                 const hashClass = index === 0 ? 'hash-highlight' : '';
 
+                const idxInFull = fullResults.findIndex(x => getPeriodKey(x) === getPeriodKey(result));
                 let resultHtml = '<span class="pending-tag">-</span>';
-                const outcome = computeRowOutcome(results, index);
+                const outcome = idxInFull >= 0 ? computeRowOutcome(fullResults, idxInFull) : null;
                 if (outcome === 'WIN') {
-                        resultHtml = '<span class="win-tag">WIN</span>';
+                    resultHtml = '<span class="win-tag">WIN</span>';
                 } else if (outcome === 'LOSE') {
-                        resultHtml = '<span class="lose-tag">LOSE</span>';
+                    resultHtml = '<span class="lose-tag">LOSE</span>';
                 }
                 
                 html += `
@@ -3104,7 +3131,23 @@
             `;
 
             tableContainer.innerHTML = html;
-            updateStats(results);
+        }
+
+        function processFirebaseData(data) {
+            const list = data && data.list && Array.isArray(data.list) ? data.list : [];
+            if (list.length === 0) {
+                renderTable([], []);
+                return;
+            }
+            const currentLatestKey = getPeriodKey(list[0]);
+            if (lastSeenLatestPeriodKey === null) {
+                lastSeenLatestPeriodKey = currentLatestKey;
+                displayedHistory = [];
+            } else if (currentLatestKey !== lastSeenLatestPeriodKey && list.length >= 2) {
+                displayedHistory = [list[1]].concat(displayedHistory);
+                lastSeenLatestPeriodKey = currentLatestKey;
+            }
+            renderTable(list, displayedHistory);
         }
 
         function connectFirebase() {
@@ -3130,14 +3173,14 @@
                     
                     if (data && data.list && Array.isArray(data.list)) {
                         currentResults = data.list;
-                        renderTable(currentResults);
+                        processFirebaseData(data);
                         updateLastUpdateTime(data.publishedAt || Date.now());
                         // Status message hidden - removed showStatus
                         // showStatus(`✅ Connected - ${currentResults.length} results loaded`, 'success');
                     } else {
                         // Status message hidden
                         // showStatus('⚠️ No data found in Firebase. Waiting for data...', 'loading');
-                        renderTable([]);
+                        renderTable([], []);
                     }
                 }, (error) => {
                     console.error('Firebase read error:', error);
