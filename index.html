@@ -2751,15 +2751,36 @@
         let predictionFirebaseApp = null;
         let predictionListener = null;
 
-        // Initialize Firebase
+        // Initialize Firebase (results DB)
         function initializeFirebase() {
             try {
-                firebase.initializeApp(firebaseConfig);
-                db = firebase.database();
+                if (db) {
+                    return true;
+                }
+
+                let resultsApp = null;
+
+                // Reuse existing named app if it already exists
+                if (firebase.apps && firebase.apps.length) {
+                    for (let i = 0; i < firebase.apps.length; i++) {
+                        if (firebase.apps[i].name === 'globaltrxResults') {
+                            resultsApp = firebase.apps[i];
+                            break;
+                        }
+                    }
+                }
+
+                // Otherwise create a dedicated app for Global TRX results
+                if (!resultsApp) {
+                    resultsApp = firebase.initializeApp(firebaseConfig, 'globaltrxResults');
+                }
+
+                db = resultsApp.database();
                 return true;
             } catch (error) {
                 console.error('Firebase initialization error:', error);
-                showStatus(`❌ Firebase initialization failed: ${error.message}`, 'error');
+                // Status message hidden in UI, but keep log for debugging
+                // showStatus(`❌ Firebase initialization failed: ${error.message}`, 'error');
                 return false;
             }
         }
@@ -2993,41 +3014,28 @@
         }
         
         function updatePredictionPanel(historyData) {
-            // If prediction data comes from Firebase Realtime Database (Mini1-1.js),
-            // it will be handled by connectPredictionFirebase() listener
-            // This function serves as fallback for client-side calculation
-            
+            // Always use local client-side calculation for V1.1
             const details = computeGlobalPredictionDetails(historyData);
             
             if (!details || !historyData || historyData.length === 0) {
-                // Only set empty if we don't have prediction from Firebase
-                if (!predictionListener) {
-                    setPredictionDisplay('-', '-', '-');
-                    togglePredictionBox(false);
-                }
+                setPredictionDisplay('-', '-', '-');
+                togglePredictionBox(false);
                 return;
             }
             
-            // Get period, prediction, and rate (fallback calculation)
             const period = details.nextPeriod || '-';
             const prediction = details.finalPrediction || null;
             
-            // Calculate Rate based on prediction accuracy (last 3 predictions)
             let rate = null;
             if (historyData && historyData.length >= 6) {
                 rate = calculateRate(historyData);
             } else if (historyData && historyData.length > 0) {
-                // Fallback: use latest number for rate if not enough history
                 const latestNumber = historyData[0].number;
                 rate = calculateRateFromNumber(latestNumber);
             }
             
-            // Only update if we don't have Firebase prediction data
-            // Firebase prediction will override this via connectPredictionFirebase()
-            if (!predictionListener) {
-                setPredictionDisplay(period, prediction, rate);
-                togglePredictionBox(true);
-            }
+            setPredictionDisplay(period, prediction, rate);
+            togglePredictionBox(true);
         }
 
         function computeRowOutcome(results, index) {
@@ -3175,14 +3183,27 @@
                 renderTable([], []);
                 return;
             }
-            const currentLatestKey = getPeriodKey(list[0]);
+
+            // Treat list[0] as the latest finished period result
+            const latestRecord = list[0];
+            const currentLatestKey = getPeriodKey(latestRecord);
+
+            if (!currentLatestKey) {
+                // Fallback: just render whatever history we currently have
+                renderTable(list, displayedHistory);
+                return;
+            }
+
             if (lastSeenLatestPeriodKey === null) {
+                // First load: show the latest finished period as the first history row
                 lastSeenLatestPeriodKey = currentLatestKey;
-                displayedHistory = [];
-            } else if (currentLatestKey !== lastSeenLatestPeriodKey && list.length >= 2) {
-                displayedHistory = [list[1]].concat(displayedHistory);
+                displayedHistory = [latestRecord];
+            } else if (currentLatestKey !== lastSeenLatestPeriodKey) {
+                // New period arrived: prepend the new latest result to history
+                displayedHistory = [latestRecord].concat(displayedHistory);
                 lastSeenLatestPeriodKey = currentLatestKey;
             }
+
             renderTable(list, displayedHistory);
         }
 
