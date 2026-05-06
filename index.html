@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <title>Global TRX Mini V1.1 - Results Data Viewer</title>
+    <title>TrxWin Wingo 1 - Results Data Viewer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -14,17 +17,41 @@
             box-sizing: border-box;
         }
 
+        /* Align with All-in-one.html - light + Neumorphism + TrxWin red */
+        :root {
+            --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+            --bg: #f1f5f9;
+            --text: #0f172a;
+            --muted: #475569;
+            --neumo-base: #e4e9f0;
+            --neumo-text: #2d3748;
+            --neumo-muted: #718096;
+            --neumo-sh-dark: rgba(163, 177, 198, 0.52);
+            --neumo-sh-light: rgba(255, 255, 255, 0.92);
+            --neumo-accent: #ff3838;
+            --neumo-raise: 6px 6px 12px var(--neumo-sh-dark), -6px -6px 12px var(--neumo-sh-light);
+            --neumo-raise-sm: 4px 4px 8px var(--neumo-sh-dark), -4px -4px 8px var(--neumo-sh-light);
+            --neumo-inset: inset 5px 5px 10px var(--neumo-sh-dark), inset -5px -5px 10px var(--neumo-sh-light);
+            --neumo-inset-sm: inset 3px 3px 6px var(--neumo-sh-dark), inset -3px -3px 6px var(--neumo-sh-light);
+            --main-color: #ff4757;
+            --main-color-dark: #ff3838;
+            --main-color-light: #ff6b7a;
+            --main-color-alpha-10: rgba(255, 71, 87, 0.12);
+            --main-color-alpha-20: rgba(255, 71, 87, 0.22);
+            --main-color-alpha-30: rgba(255, 71, 87, 0.32);
+            --main-color-alpha-50: rgba(255, 71, 87, 0.45);
+            --main-color-alpha-80: rgba(255, 71, 87, 0.75);
+            --yellow-accent: #ca8a04;
+            --white-bg: #ffffff;
+            --blue-bg: #f1f5f9;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #041330;
-            background-image: 
-                radial-gradient(circle at 20% 20%, rgba(255, 71, 87, 0.35), transparent 45%),
-                radial-gradient(circle at 80% 0%, rgba(83, 82, 237, 0.35), transparent 50%),
-                radial-gradient(circle at 50% 100%, rgba(46, 213, 115, 0.3), transparent 50%),
-                linear-gradient(135deg, #031536 0%, #041d43 50%, #021230 100%);
+            font-family: var(--font-sans);
+            background: var(--bg);
             padding: 32px;
             min-height: 100vh;
-            color: var(--main-color);
+            color: var(--text);
             position: relative;
             overflow-x: hidden;
             -webkit-text-size-adjust: 100%;
@@ -35,23 +62,49 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: rgba(4, 14, 30, 0.65);
-            border-radius: 24px;
+            background: var(--neumo-base);
+            border-radius: 26px;
             padding: 32px;
             position: relative;
             z-index: 1;
-            border: 1px solid rgba(110, 203, 255, 0.18);
-            box-shadow: 0 10px 24px rgba(3, 7, 30, 0.45);
+            border: none;
+            box-shadow: var(--neumo-raise);
         }
 
-        /* View_Results page h1 - Black color */
+        /* View_Results page brand (top-left) */
+        #resultsContainer .results-brand-header {
+            text-align: left;
+            align-self: flex-start;
+            width: 100%;
+            margin-bottom: 4px;
+        }
+        #resultsContainer .results-brand-title {
+            color: var(--neumo-text);
+            font-size: clamp(1.15rem, 3.8vw, 1.55rem);
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            line-height: 1.2;
+            margin: 0 0 4px 0;
+            text-align: left;
+            white-space: normal;
+        }
+        #resultsContainer .results-brand-sub {
+            margin: 0;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--neumo-muted);
+            letter-spacing: 0.06em;
+            text-align: left;
+        }
+
+        /* View_Results page h1 (fallback / other pages) */
         #resultsContainer h1,
         .results-container h1 {
-            color: #000000;
+            color: var(--neumo-text);
         }
 
         h1 {
-            color: #e3e7ef;
+            color: var(--neumo-text);
             text-align: center;
             margin-bottom: 12px;
             font-size: clamp(1.6rem, 5.4vw, 2.8rem);
@@ -64,21 +117,7 @@
             line-height: 1.2;
             text-shadow: none;
         }
-        h1 {
-            color: #e3e7ef;
-            text-align: center;
-            margin-bottom: 12px;
-            font-size: clamp(1.6rem, 5.4vw, 2.8rem);
-            font-weight: 800;
-            letter-spacing: 1.5px;
-            white-space: nowrap;
-            overflow: visible;
-            text-overflow: clip;
-            word-break: keep-all;
-            line-height: 1.2;
-            text-shadow: 0 0 40px rgba(255, 215, 130, 0.25);
-        }
-
+        
         .title-subtitle span {
             display: inline-block;
             letter-spacing: inherit;
@@ -86,10 +125,10 @@
 
         .subtitle {
             text-align: center;
-            color: rgba(224, 243, 255, 0.85);
+            color: var(--neumo-muted);
             margin-bottom: 40px;
             font-size: 0.95rem;
-            font-weight: 500;
+            font-weight: 600;
             letter-spacing: 3px;
             text-transform: uppercase;
         }
@@ -104,21 +143,25 @@
         }
 
         button {
-            background: linear-gradient(120deg, #5ed0ff, #2d74ff);
+            background: linear-gradient(145deg, #ff6b7a 0%, #ff4757 45%, #ff3838 100%);
             color: #fefefe;
             border: 0;
             padding: 12px 24px;
-            border-radius: 999px;
+            border-radius: 18px;
             cursor: pointer;
             font-size: 14px;
-            font-weight: 600;
-            letter-spacing: 0.1em;
+            font-weight: 700;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            box-shadow: 0 8px 20px rgba(45, 116, 255, 0.35);
+            box-shadow:
+                6px 6px 14px rgba(79, 70, 229, 0.3),
+                -4px -4px 12px rgba(255, 255, 255, 0.35);
         }
 
         button:hover:not(:disabled) {
-            box-shadow: 0 12px 26px rgba(45, 116, 255, 0.45);
+            box-shadow:
+                4px 4px 12px rgba(79, 70, 229, 0.28),
+                -3px -3px 10px rgba(255, 255, 255, 0.4);
         }
 
         button:disabled {
@@ -189,16 +232,16 @@
             border-collapse: separate;
             border-spacing: 0;
             margin-top: 28px;
-            background: transparent;
+            background: var(--white-bg);
             border-radius: 20px;
             overflow: hidden;
-            border: 1px solid rgba(110, 203, 255, 0.18);
-            box-shadow: 0 12px 24px rgba(2, 8, 20, 0.45);
+            border: none;
+            box-shadow: var(--neumo-inset-sm);
         }
 
         thead {
-            background: linear-gradient(120deg, rgba(28, 34, 48, 0.95), rgba(50, 60, 80, 0.95));
-            color: #dfe5ef;
+            background: linear-gradient(145deg, #eef2ff 0%, #e0e7ff 100%);
+            color: var(--neumo-text);
         }
 
         th {
@@ -208,8 +251,8 @@
             font-size: 0.8rem;
             text-transform: uppercase;
             letter-spacing: 0.35em;
-            color: #ffffff;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--main-color-dark);
+            border-bottom: 1px solid var(--main-color-alpha-20);
         }
 
         th:first-child {
@@ -222,21 +265,21 @@
 
         td {
             padding: 18px 22px;
-            border-bottom: 1px solid rgba(110, 203, 255, 0.1);
+            border-bottom: 1px solid rgba(15, 23, 42, 0.06);
             font-size: 0.95rem;
-            color: rgba(223, 239, 255, 0.95);
-            background: rgba(6, 18, 44, 0.75);
+            color: var(--neumo-text);
+            background: var(--white-bg);
         }
 
         td.period-number,
         td.number-column {
-            color: #ffffff;
+            color: var(--text);
             font-weight: 800;
         }
 
 
         tbody tr:hover {
-            background: rgba(21, 53, 103, 0.85);
+            background: var(--main-color-alpha-10);
         }
 
         tbody tr:last-child td {
@@ -245,13 +288,13 @@
 
         /* Legacy classes - kept for compatibility */
         .big {
-            color: var(--yellow-accent);
+            color: #ca8a04;
             font-weight: 800;
             font-size: 16px;
         }
 
         .small {
-            color: var(--main-color);
+            color: var(--main-color-dark);
             font-weight: 800;
             font-size: 16px;
         }
@@ -280,22 +323,22 @@
         
         /* Enhanced Premium Code - using premium-code class */
         .premium-code {
-            font-family: 'Orbitron', monospace;
-            background: linear-gradient(135deg, #06080f, #1a1f2c);
+            font-family: var(--font-sans);
+            background: var(--neumo-base);
             padding: 10px 16px;
-            border-radius: 12px;
+            border-radius: 14px;
             font-size: 1rem;
             font-weight: 700;
-            color: #f4f6fb;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--neumo-text);
+            border: none;
             display: inline-block;
             letter-spacing: 0.45em;
             text-transform: uppercase;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55);
+            box-shadow: var(--neumo-inset-sm);
         }
 
         .timestamp {
-            color: rgba(255, 255, 255, 0.6);
+            color: var(--neumo-muted);
             font-size: 12px;
             font-weight: 500;
         }
@@ -308,11 +351,11 @@
         }
 
         .count-display {
-            background: linear-gradient(145deg, rgba(7, 23, 45, 0.9), rgba(10, 32, 66, 0.85));
+            background: var(--neumo-base);
             padding: 26px;
-            border-radius: 20px;
-            border: 1px solid rgba(110, 203, 255, 0.35);
-            box-shadow: 0 16px 28px rgba(5, 12, 24, 0.7);
+            border-radius: 22px;
+            border: none;
+            box-shadow: var(--neumo-raise);
             position: relative;
             overflow: hidden;
         }
@@ -321,14 +364,14 @@
             content: "";
             position: absolute;
             inset: 0;
-            background: radial-gradient(circle at 10% 20%, rgba(110, 203, 255, 0.25), transparent),
-                        radial-gradient(circle at 80% 0%, rgba(255, 215, 0, 0.25), transparent);
-            opacity: 0.6;
+            background: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.08), transparent),
+                        radial-gradient(circle at 80% 0%, rgba(234, 179, 8, 0.08), transparent);
+            opacity: 1;
             pointer-events: none;
         }
 
         .count-label {
-            color: #f2fbff;
+            color: var(--neumo-text);
             font-weight: 700;
             font-size: 0.9rem;
             margin-bottom: 16px;
@@ -340,9 +383,9 @@
         .loading-bar-container {
             width: 100%;
             height: 52px;
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.5);
             border-radius: 26px;
-            border: 1px solid rgba(110, 203, 255, 0.25);
+            border: 2px solid var(--main-color-alpha-30);
             overflow: hidden;
             position: relative;
         }
@@ -367,7 +410,7 @@
         }
 
         .count-number {
-            color: #0b1b32;
+            color: #1e1b4b;
             font-weight: 900;
             font-size: 1.1rem;
         }
@@ -375,10 +418,11 @@
         .no-data {
             text-align: center;
             padding: 80px 20px;
-            color: rgba(255, 255, 255, 0.6);
-            background: rgba(255, 255, 255, 0.03);
+            color: var(--neumo-muted);
+            background: var(--neumo-base);
             border-radius: 16px;
-            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border: 1px dashed var(--main-color-alpha-30);
+            box-shadow: var(--neumo-inset-sm);
         }
 
         .no-data svg {
@@ -427,124 +471,6 @@
         /* Quantum AI Key Unlock Styles */
         .hidden { display: none !important; }
         
-        /* ========== PREMIUM 3D INTRO ANIMATION STYLES ========== */
-        #introAnimation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #000000;
-            z-index: 10000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            perspective: 1000px;
-        }
-        
-        .intro-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            perspective: 1500px;
-        }
-        
-        /* Premium cosmic background with enhanced gradients */
-        .cosmic-bg {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            opacity: 0.65;
-            pointer-events: none;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(95, 191, 255, 0.25) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(45, 116, 255, 0.2) 0%, transparent 50%),
-                radial-gradient(circle at 50% 50%, rgba(70, 160, 255, 0.18) 0%, transparent 70%);
-        }
-
-        .particle {
-            display: none;
-        }
-        
-        /* 3D Logo container with perspective and enhanced effects */
-        .logo-container {
-            position: relative;
-            width: 450px;
-            height: 400px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
-        }
-        
-        /* Text below LT logo */
-        .logo-text-container {
-            position: relative;
-            width: 100%;
-            margin-top: 40px;
-            text-align: center;
-            opacity: 1;
-        }
-        
-        .logo-text-main {
-            font-family: 'Arial', 'Impact', sans-serif;
-            font-size: 18px;
-            font-weight: 600;
-            color: #7fd0ff;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-        
-        .logo-text-sub {
-            font-family: 'Arial', 'Impact', sans-serif;
-            font-size: 14px;
-            font-weight: 700;
-            color: #ffd782;
-            letter-spacing: 2px;
-        }
-        
-        /* Premium 3D LT Logo with glow effect */
-        .lt-logo {
-            font-family: 'Arial Black', 'Impact', sans-serif;
-            font-size: 220px;
-            font-weight: 900;
-            letter-spacing: -18px;
-            line-height: 1.2;
-            position: relative;
-            opacity: 1;
-        }
-        
-        
-        .lt-logo .letter-l {
-            display: inline-block;
-            color: #7fd0ff;
-            position: relative;
-        }
-        
-        .lt-logo .letter-t {
-            display: inline-block;
-            position: relative;
-            color: #7fd0ff;
-        }
-        
-        /* Smooth diagonal bar that cuts through LT */
-        .lt-logo::before {
-            display: none;
-        }
-        
-        /* Premium fade out */
-        #introAnimation.fade-out {
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
         /* Mobile responsive - No Boxes, Smaller Text */
         @media (max-width: 768px) {
             body {
@@ -579,34 +505,6 @@
                 font-size: 1rem;
                 letter-spacing: 0;
                 padding: 0;
-            }
-            
-            .lt-logo {
-                font-size: 140px;
-                letter-spacing: -10px;
-                line-height: 1.2;
-            }
-            
-            .logo-container {
-                width: 320px;
-                height: 280px;
-            }
-            
-            .logo-text-main {
-                font-size: 14px;
-                padding: 0 10px;
-            }
-            
-            .logo-text-sub {
-                font-size: 11px;
-            }
-            
-            #introAnimation {
-                perspective: 800px;
-            }
-            
-            .intro-container {
-                perspective: 1000px;
             }
             
             .quantum-gate {
@@ -686,24 +584,6 @@
                 letter-spacing: 0.2em;
             }
             
-            .lt-logo {
-                font-size: 120px;
-                letter-spacing: -8px;
-            }
-            
-            .logo-container {
-                width: 280px;
-                height: 240px;
-            }
-            
-            .logo-text-main {
-            font-size: 12px;
-            }
-            
-            .logo-text-sub {
-                font-size: 10px;
-            }
-            
             .container {
                 padding: 15px 10px;
             }
@@ -731,15 +611,7 @@
             z-index: 9999;
             overflow-x: hidden;
             overflow-y: hidden;
-            background: #03183c;
-            background-image: 
-                radial-gradient(circle at 20% 20%, rgba(255, 71, 87, 0.35), transparent 45%),
-                radial-gradient(circle at 80% 0%, rgba(83, 82, 237, 0.35), transparent 50%),
-                radial-gradient(circle at 50% 100%, rgba(46, 213, 115, 0.3), transparent 50%),
-                linear-gradient(135deg, #02163b 0%, #03224f 55%, #021432 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: var(--bg);
             padding: clamp(20px, 4vw, 50px);
         }
 
@@ -748,21 +620,20 @@
             position: absolute;
             inset: 0;
             pointer-events: none;
-            background: radial-gradient(60% 80% at 50% 20%, rgba(80, 168, 255, 0.3), transparent 60%);
-            opacity: 0.8;
+            background: radial-gradient(60% 80% at 50% 20%, rgba(99, 102, 241, 0.12), transparent 60%);
+            opacity: 1;
         }
         
         .quantum-gate {
             width: min(480px, 100%);
             padding: clamp(28px, 6vw, 48px);
             border-radius: 28px;
-            background: rgba(5, 15, 35, 0.9);
-            border: 1px solid rgba(110, 203, 255, 0.35);
-            box-shadow:
-                0 25px 60px rgba(3, 7, 30, 0.85),
-                inset 0 0 45px rgba(110, 203, 255, 0.08);
+            background: var(--neumo-base);
+            border: none;
+            box-shadow: var(--neumo-raise);
             display: flex;
             flex-direction: column;
+            align-items: stretch;
             gap: 18px;
             text-align: center;
             position: absolute;
@@ -785,10 +656,10 @@
         }
         
         .quantum-title {
-            font-family: 'Orbitron', sans-serif;
+            font-family: var(--font-sans);
             font-size: 1.1rem;
             font-weight: 700;
-            color: #ffffff;
+            color: var(--neumo-text);
             letter-spacing: 0.08em;
             text-transform: none;
             line-height: 1.3;
@@ -797,52 +668,73 @@
             text-shadow: none;
             margin-bottom: 8px;
         }
+
+        #gate .gate-brand-header {
+            width: 100%;
+            text-align: left;
+            margin-bottom: 8px;
+        }
+        #gate .gate-brand-header .quantum-title {
+            text-align: left;
+            white-space: normal;
+            margin-bottom: 4px;
+            font-size: clamp(1rem, 3.2vw, 1.25rem);
+            letter-spacing: 0.04em;
+        }
+        .brand-red { color: #dc2626; }
+        .brand-black { color: #111827; }
+        #gate .gate-brand-sub {
+            margin: 0;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--neumo-muted);
+            letter-spacing: 0.05em;
+        }
         
         .quantum-input {
             width: 100%;
             padding: 18px 22px;
             margin: 4px 0 8px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(110, 203, 255, 0.4);
+            background: #ffffff;
+            border: 2px solid var(--main-color-alpha-30);
             border-radius: 18px;
-            color: #e5f2ff;
+            color: var(--neumo-text);
             font-size: 1rem;
             text-align: center;
-            transition: all 0.35s ease;
             text-transform: uppercase;
             letter-spacing: 0.45em;
             font-weight: 700;
-            font-family: 'Orbitron', sans-serif;
-            box-shadow: inset 0 0 25px rgba(110, 203, 255, 0.08);
+            font-family: var(--font-sans);
+            box-shadow: var(--neumo-inset-sm);
         }
         
         .quantum-input::placeholder {
-            color: rgba(229, 242, 255, 0.4);
+            color: var(--neumo-muted);
             letter-spacing: 0.2em;
         }
         
         .quantum-input:focus {
             outline: none;
-            border-color: rgba(255, 255, 255, 0.85);
-            background: rgba(255, 255, 255, 0.06);
-            box-shadow: 0 0 25px rgba(110, 203, 255, 0.35);
-            transform: translateY(-2px);
+            border-color: var(--main-color-dark);
+            background: #fff;
+            box-shadow: 0 0 0 3px var(--main-color-alpha-20);
         }
         
         .quantum-button {
             width: 100%;
             padding: 18px;
-            background: linear-gradient(120deg, #5ed0ff, #2d74ff);
+            background: linear-gradient(145deg, #ff6b7a 0%, #ff4757 45%, #ff3838 100%);
             border: none;
-            border-radius: 999px;
+            border-radius: 18px;
             color: #ffffff;
             font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
             letter-spacing: 0.35em;
             text-transform: uppercase;
-            box-shadow: 0 18px 38px rgba(45, 116, 255, 0.45);
+            box-shadow:
+                6px 6px 14px rgba(79, 70, 229, 0.35),
+                -4px -4px 12px rgba(255, 255, 255, 0.35);
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -850,8 +742,9 @@
         }
         
         .quantum-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 24px 45px rgba(45, 116, 255, 0.55);
+            box-shadow:
+                4px 4px 12px rgba(79, 70, 229, 0.32),
+                -3px -3px 10px rgba(255, 255, 255, 0.4);
         }
         
         .quantum-button i {
@@ -885,8 +778,8 @@
             position: absolute;
             top: 24.5px;
             left: 21px;
-            animation: load9243 1.2s linear infinite;
             transform-origin: top center;
+            animation: load9243 1.2s linear infinite;
         }
         
         .loader .min {
@@ -956,7 +849,6 @@
             padding-right: 1.4em;
             width: 100%;
             cursor: pointer;
-            transition: all 0.35s ease;
             box-shadow: inset 0 0 18px rgba(110, 203, 255, 0.12);
         }
         
@@ -970,24 +862,13 @@
             align-items: center;
             justify-content: center;
             left: 0.6em;
-            transition: all 0.45s;
         }
         
         .icon svg {
             margin-left: 0.1em;
-            transition: all 0.5s;
             color: var(--main-color-dark);
             width: 1.2rem;
             height: 1.2rem;
-        }
-        
-        .button:hover .icon svg {
-            transform: rotate(360deg);
-        }
-        
-        .button:hover .icon {
-            width: calc(100% - 1rem);
-            border-radius: 999px;
         }
         
         .button:hover {
@@ -1008,7 +889,9 @@
         }
         
         .results-container.unlocked {
-            display: block;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
         }
         
         @media (max-width: 768px) {
@@ -1093,10 +976,6 @@
             
             .count-number {
                 font-size: 1.2rem;
-            }
-            
-            .logo-container {
-                transform: scale(0.8); /* Scale down logo on mobile */
             }
             
             /* Prediction Box - Tablet responsive */
@@ -1274,21 +1153,17 @@
                 padding: 3px 4px;
                 letter-spacing: 0;
             }
-            
-            .logo-container {
-                transform: scale(0.6);
-            }
-            
+        
             /* Prediction Box - Very small phones */
             .prediction-label {
                 font-size: 0.5rem;
-            }
-            
+        }
+        
             .prediction-row {
                 gap: 3px;
                 padding: 4px 0;
-            }
-            
+        }
+        
             .prediction-value,
             .prediction-rate {
                 font-size: 0.56rem;
@@ -1296,37 +1171,12 @@
             
             .prediction-box {
                 padding: 8px 10px;
-            }
+        }
         }
         
         /* Performance Optimizations */
         * {
             -webkit-tap-highlight-color: transparent;
-        }
-        
-        body, .container, .quantum-gate {
-            will-change: auto;
-        }
-        
-        .lt-logo, .letter-l, .letter-t, .bar-cut {
-            will-change: transform;
-            transform: translateZ(0);
-            backface-visibility: hidden;
-            perspective: 1000px;
-        }
-        
-        .particle {
-            will-change: transform;
-            transform: translateZ(0);
-        }
-        
-        button, .quantum-input {
-            will-change: transform;
-            transform: translateZ(0);
-        }
-        
-        table, tbody, tr, td {
-            will-change: contents;
         }
         
         /* Smooth Scrolling */
@@ -1351,51 +1201,37 @@
             -moz-osx-font-smoothing: grayscale;
         }
         
-        /* Professional Color Scheme - Red/Blue/Green Theme */
-        :root {
-            --main-color: #ff4757;
-            --main-color-dark: #ff3838;
-            --main-color-light: #ff6b7a;
-            --main-color-alpha-10: rgba(255, 71, 87, 0.1);
-            --main-color-alpha-20: rgba(255, 71, 87, 0.2);
-            --main-color-alpha-30: rgba(255, 71, 87, 0.3);
-            --main-color-alpha-50: rgba(255, 71, 87, 0.5);
-            --main-color-alpha-80: rgba(255, 71, 87, 0.8);
-            --blue-accent: #5352ed;
-            --green-accent: #2ed573;
-            --yellow-accent: #ffd782;
-            --white-bg: #ffffff;
-            --blue-bg: #0f2c4f;
-        }
+        /* (theme variables live in :root at top of stylesheet) */
         
-        /* Enhanced Button Styles */
+        /* Enhanced Button Styles - neumo TrxWin pill */
         button {
-            background: linear-gradient(120deg, #1a1f2c, #30394c);
+            background: linear-gradient(145deg, #ff6b7a 0%, #ff4757 45%, #ff3838 100%);
             color: #f5f7fb;
             border: none;
             padding: 14px 28px;
-            border-radius: 12px;
+            border-radius: 18px;
             cursor: pointer;
             font-size: 15px;
-            font-weight: 600;
-            letter-spacing: 0.1em;
+            font-weight: 700;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+            box-shadow:
+                6px 6px 14px rgba(79, 70, 229, 0.3),
+                -4px -4px 12px rgba(255, 255, 255, 0.35);
         }
         
         button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            box-shadow:
+                4px 4px 12px rgba(79, 70, 229, 0.28),
+                -3px -3px 10px rgba(255, 255, 255, 0.4);
         }
         
         button:active {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+            box-shadow: var(--neumo-inset);
         }
         
-        /* Enhanced Input Styles */
-        .quantum-input {
+        /* Enhanced Input Styles (skip #keyInput — gate uses KEY ENTRY unlock styles) */
+        .quantum-input:not(#keyInput) {
             width: 100%;
             padding: 16px 20px;
             margin: 12px 0;
@@ -1405,21 +1241,18 @@
             color: var(--main-color);
             font-size: 16px;
             text-align: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-transform: uppercase;
             letter-spacing: 2px;
             font-weight: 600;
-            transform: translateZ(0);
         }
         
-        .quantum-input:focus {
+        .quantum-input:not(#keyInput):focus {
             outline: none;
             border-color: var(--main-color-dark);
             box-shadow: 0 0 0 3px var(--main-color-alpha-20);
-            transform: scale(1.02) translateZ(0);
         }
         
-        .quantum-input::placeholder {
+        .quantum-input:not(#keyInput)::placeholder {
             color: var(--main-color-alpha-50);
             text-transform: none;
             letter-spacing: 1px;
@@ -1454,8 +1287,8 @@
         }
         
         thead {
-            background: transparent;
-            color: var(--white-bg);
+            background: linear-gradient(145deg, #eef2ff 0%, #e0e7ff 100%);
+            color: var(--neumo-text);
         }
         
         th {
@@ -1466,12 +1299,12 @@
             letter-spacing: 0.5px;
             font-size: 0.5rem;
             border: none;
-            color: #ffffff;
+            color: var(--main-color-dark);
         }
         
         tbody tr {
             transition: all 0.3s ease;
-            border-bottom: 1px solid rgba(110, 203, 255, 0.2);
+            border-bottom: 1px solid rgba(15, 23, 42, 0.06);
             background: transparent;
         }
 
@@ -1480,19 +1313,19 @@
         }
         
         tbody tr:nth-child(even) {
-            background: rgba(110, 203, 255, 0.05);
+            background: rgba(99, 102, 241, 0.04);
         }
         
         tbody tr:hover {
-            background: rgba(110, 203, 255, 0.15);
-            transform: translateX(4px);
-            box-shadow: -4px 0 8px rgba(110, 203, 255, 0.2);
+            background: var(--main-color-alpha-10);
+            transform: translateX(2px);
+            box-shadow: -2px 0 6px rgba(99, 102, 241, 0.12);
         }
         
         td {
             padding: 6px 4px;
-            border-bottom: 1px solid rgba(110, 203, 255, 0.2);
-            color: #ffffff;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+            color: var(--neumo-text);
             word-break: break-word;
             font-weight: 600;
             font-size: 0.5rem;
@@ -1517,31 +1350,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
-            transform: translateZ(0);
         }
         
         .loading-bar::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-            animation: shimmer 2s infinite;
-        }
-        
-        
-        @keyframes shimmer {
-            0% {
-                left: -100%;
-            }
-            100% {
-                left: 100%;
-            }
+            display: none;
         }
         
         .loading-bar.yellow {
@@ -1552,41 +1366,37 @@
         .count-number {
             position: relative;
             z-index: 1;
-            color: white;
+            color: #1e1b4b;
             font-weight: 800;
             font-size: 1.1rem;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            text-shadow: none;
         }
         
-        /* Enhanced Timer Display with Glassmorphism */
-        .quantum-timer {
+        /* Enhanced Timer Display with Glassmorphism (skip #key-timer — gate timer uses KEY ENTRY styles) */
+        .quantum-timer:not(#key-timer) {
             text-align: center;
             margin: 20px 0;
             padding: 14px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 12px;
-            border: 2px solid rgba(110, 203, 255, 0.5);
+            background: var(--neumo-base);
+            border-radius: 16px;
+            border: none;
+            box-shadow: var(--neumo-inset-sm);
             font-size: 1rem;
-            color: var(--main-color);
+            color: var(--main-color-dark);
             font-weight: 700;
             letter-spacing: 1px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 12px;
-            transform: translateZ(0);
             box-shadow: 0 4px 15px rgba(110, 203, 255, 0.2);
-            transition: all 0.3s ease;
         }
         
-        .quantum-timer:hover {
+        .quantum-timer:not(#key-timer):hover {
             box-shadow: 0 6px 20px rgba(110, 203, 255, 0.3);
-            transform: translateY(-2px);
         }
         
-        .quantum-timer-text {
+        .quantum-timer-text:not(#timerText) {
             color: var(--main-color);
             font-weight: 700;
             font-size: 1rem;
@@ -1598,52 +1408,50 @@
             padding: 10px 0;
             border: none;
             box-shadow: none;
-            transform: translateZ(0);
         }
 
         .count-label {
-            color: var(--white-bg);
+            color: var(--neumo-text);
             font-weight: 800;
             font-size: 1rem;
             margin-bottom: 12px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            text-shadow: none;
         }
         
         /* Premium Code Styling - Enhanced */
         .premium-code {
-            font-family: 'Courier New', monospace;
-            background: linear-gradient(135deg, #05070d, #161b28);
+            font-family: var(--font-sans);
+            background: var(--neumo-base);
             padding: 10px 16px;
-            border-radius: 10px;
+            border-radius: 14px;
             font-size: 1.1rem;
             font-weight: 800;
-            color: #f4f6fb;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--neumo-text);
+            border: none;
             display: inline-block;
             letter-spacing: 2px;
             text-transform: uppercase;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
-            transform: translateZ(0);
+            box-shadow: var(--neumo-inset-sm);
         }
         
         /* Period Number Styling */
         .period-number {
             font-weight: 700;
-            color: #ffffff;
-            font-family: 'Courier New', monospace;
+            color: var(--neumo-text);
+            font-family: ui-monospace, monospace;
         }
         
-        /* Results Number Column - White Color */
+        /* Results Number Column */
         td.number-column {
-            color: #ffffff !important;
+            color: var(--neumo-text) !important;
             font-weight: 700;
         }
         
         /* Number column using nth-child selector */
         tbody td:nth-child(3) {
-            color: #000000 !important;
+            color: var(--neumo-text) !important;
             font-weight: 700;
         }
         
@@ -1671,35 +1479,33 @@
             }
         }
 
-        /* Premium Prediction Box with Glassmorphism - Red/Blue/Green Theme */
+        /* Prediction box - neumo (All-in-one aligned) */
         .prediction-box {
-            background: linear-gradient(135deg, rgba(13, 36, 66, 0.85), rgba(9, 24, 48, 0.92));
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border: 1px solid rgba(255, 71, 87, 0.35);
+            background: var(--neumo-base);
+            border: none;
             padding: 22px 24px;
             margin-bottom: 22px;
-            border-radius: 20px;
-            box-shadow: 0 10px 35px rgba(5, 13, 30, 0.65);
+            border-radius: 22px;
+            box-shadow: var(--neumo-raise);
             display: none;
             position: relative;
             overflow: hidden;
         }
 
         .prediction-box:hover {
-            box-shadow: 0 6px 25px rgba(255, 71, 87, 0.25);
-            transform: translateY(-2px);
+            box-shadow: var(--neumo-raise-sm);
+            transform: translateY(-1px);
         }
         
         .prediction-title {
-            color: #e6f6ff;
+            color: var(--neumo-text);
             font-weight: 800;
             font-size: 1rem;
             text-align: center;
             margin-bottom: 16px;
             letter-spacing: 0.18em;
             text-transform: uppercase;
-            text-shadow: 0 0 12px rgba(255, 71, 87, 0.55);
+            text-shadow: none;
         }
 
         .prediction-row {
@@ -1709,7 +1515,7 @@
             gap: 6px;
             padding: 12px 4px;
             width: 100%;
-            border-bottom: 1px solid rgba(255, 71, 87, 0.18);
+            border-bottom: 1px solid rgba(15, 23, 42, 0.08);
         }
         
         .prediction-row:first-of-type {
@@ -1722,7 +1528,7 @@
         }
 
         .prediction-label {
-            color: rgba(213, 235, 255, 0.9);
+            color: var(--neumo-muted);
             font-weight: 700;
             font-size: 0.72rem;
             letter-spacing: 0.12em;
@@ -1744,199 +1550,130 @@
 
         .prediction-value {
             font-weight: 800;
-            color: var(--yellow-accent);
-            font-family: 'Orbitron', sans-serif;
-            text-shadow: 0 0 12px rgba(255, 215, 0, 0.55);
+            color: #ca8a04;
+            font-family: var(--font-sans);
+            text-shadow: none;
         }
         
-        /* Period number - always yellow */
+        /* Period number */
         #predPeriod,
         #ckLotteryPredPeriod {
-            color: var(--yellow-accent) !important;
+            color: #ca8a04 !important;
         }
         
-        /* Prediction result - BIG yellow, SMALL blue */
+        /* Prediction result - BIG gold, SMALL indigo */
         .prediction-value.big,
         #predResult.big,
         #ckLotteryPredResult.big {
-            color: var(--yellow-accent) !important;
+            color: #ca8a04 !important;
         }
         
         .prediction-value.small,
         #predResult.small,
         #ckLotteryPredResult.small {
-            color: #5352ed !important; /* Blue color */
+            color: var(--main-color-dark) !important;
         }
         
         /* Prediction Rate Styling */
         .prediction-rate {
             font-weight: 800;
             font-size: 0.88rem;
-            font-family: 'Orbitron', sans-serif;
-            text-shadow: 0 0 10px rgba(110, 203, 255, 0.45);
+            font-family: var(--font-sans);
+            text-shadow: none;
         }
         
         .prediction-rate.low {
-            color: #ff0000 !important; /* Red */
+            color: #dc2626 !important;
         }
         
         .prediction-rate.medium {
-            color: #0066ff !important; /* Blue */
+            color: var(--main-color-dark) !important;
         }
         
         .prediction-rate.high {
-            color: #00ff00 !important; /* Green */
+            color: #ff3838 !important;
         }
 
-        /* Global TRX Prediction Panel */
-        .prediction-panel {
-            background: linear-gradient(135deg, rgba(10, 26, 52, 0.92), rgba(4, 12, 28, 0.95));
-            border: 1px solid rgba(110, 203, 255, 0.35);
-            border-radius: 24px;
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: 0 18px 38px rgba(2, 10, 24, 0.65);
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
-
-        .prediction-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .prediction-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .meta-chip {
-            padding: 4px 12px;
-            border-radius: 999px;
-            border: 1px solid rgba(110, 203, 255, 0.35);
-            color: rgba(224, 243, 255, 0.9);
-            font-size: 0.65rem;
-            letter-spacing: 0.24em;
-            text-transform: uppercase;
-            background: rgba(255, 255, 255, 0.04);
-        }
-
-        .mode-tag {
-            padding: 8px 16px;
-            border-radius: 14px;
-            font-weight: 800;
-            letter-spacing: 0.35em;
-            text-transform: uppercase;
-            min-width: 110px;
-            text-align: center;
-            color: #fff;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
-        }
-
-        .mode-tag.win {
-            background: linear-gradient(120deg, #0dd07f, #009c68);
-        }
-
-        .mode-tag.lose {
-            background: linear-gradient(120deg, #ff4d4d, #c30030);
-        }
-
-        .mode-tag.neutral {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px dashed rgba(110, 203, 255, 0.4);
-            color: rgba(224, 243, 255, 0.8);
-        }
-
-        .outcome-tag {
-            font-size: 0.7rem;
-            letter-spacing: 0.4em;
-        }
-
-        .prediction-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 18px;
-        }
-
-        .prediction-cell {
-            border: 1px solid rgba(110, 203, 255, 0.25);
-            border-radius: 16px;
+        /* Prediction System panel (aligned with Mini v1.2 TrxWin1 layout) */
+        #predSystemBox.ck12-pred-system-box {
+            display: none;
             padding: 16px;
-            background: rgba(255, 255, 255, 0.03);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            min-height: 100px;
+            background: var(--main-color-alpha-10);
+            border: 1px solid var(--main-color-alpha-30);
+            border-radius: 12px;
+            margin-bottom: 18px;
+            box-sizing: border-box;
         }
-
-        .prediction-footer {
+        .ck12-pred-system-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--neumo-text);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--main-color-alpha-30);
+            text-align: left;
+            letter-spacing: 0.06em;
+        }
+        .ck12-pred-system-row {
             display: flex;
-            flex-wrap: wrap;
-            align-items: center;
             justify-content: space-between;
-            gap: 12px;
+            align-items: center;
+            padding: 6px 0;
+            font-size: 0.85rem;
+            color: var(--neumo-text);
+            gap: 10px;
+            text-align: left;
+        }
+        .ck12-pred-system-label {
+            font-weight: 600;
+            color: var(--neumo-muted);
+            flex-shrink: 0;
+        }
+        .ck12-pred-system-value {
+            font-family: ui-monospace, monospace;
+            font-weight: 700;
+            text-align: right;
+        }
+        .ck12-pred-system-value.psys-pred-big { color: #ca8a04 !important; }
+        .ck12-pred-system-value.psys-pred-small { color: var(--main-color-dark) !important; }
+        .ck12-pred-system-content { animation: psys-fadeIn 0.35s ease; }
+        @keyframes psys-fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .ck12-pred-system-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 20px;
+            font-size: 0.9rem;
+            color: var(--neumo-muted);
+            font-weight: 600;
+        }
+        .ck12-pred-system-loading .dots { display: inline-flex; gap: 4px; }
+        .ck12-pred-system-loading .dots span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--main-color-dark);
+            animation: psys-dot 1.4s ease-in-out infinite;
+        }
+        .ck12-pred-system-loading .dots span:nth-child(2) { animation-delay: 0.2s; }
+        .ck12-pred-system-loading .dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes psys-dot {
+            0%, 80%, 100% { opacity: 0.35; transform: scale(0.85); }
+            40% { opacity: 1; transform: scale(1.05); }
         }
 
-        .calc-note {
-            font-size: 0.76rem;
-            color: rgba(224, 243, 255, 0.85);
-            letter-spacing: 0.08em;
-        }
-
-        .calc-note strong {
-            color: var(--yellow-accent);
-        }
-
-        .hash-highlight,
-        .number-highlight {
-            position: relative;
-            padding-left: 14px;
-        }
-
-        .hash-highlight::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translate(-12px, -50%);
-            width: 0;
-            height: 0;
-            border-top: 7px solid transparent;
-            border-bottom: 7px solid transparent;
-            border-right: 10px solid #ff4d6d;
-            filter: drop-shadow(0 0 6px rgba(255, 77, 109, 0.6));
-        }
-
-        .number-highlight::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translate(-12px, -50%);
-            width: 0;
-            height: 0;
-            border-top: 7px solid transparent;
-            border-bottom: 7px solid transparent;
-            border-right: 10px solid #00d084;
-            filter: drop-shadow(0 0 6px rgba(0, 208, 132, 0.5));
-        }
-
-        /* Merged Stats Box with Glassmorphism */
+        /* Merged Stats Box */
         .stats-merged {
-            background: rgba(7, 18, 38, 0.82);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(110, 203, 255, 0.2);
+            background: var(--neumo-base);
+            border: none;
             padding: 20px;
             margin-bottom: 18px;
-            border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(2, 12, 25, 0.55);
+            border-radius: 20px;
+            box-shadow: var(--neumo-raise);
             display: none;
         }
 
@@ -1952,7 +1689,7 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 8px;
-            color: rgba(231, 244, 255, 0.9);
+            color: var(--neumo-text);
             font-weight: 700;
             font-size: 0.82rem;
             text-transform: uppercase;
@@ -2018,48 +1755,31 @@
             justify-content: center;
             gap: 6px;
             padding: 16px 20px;
-            background: linear-gradient(135deg, rgba(110, 203, 255, 0.95) 0%, rgba(107, 182, 214, 0.95) 100%);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 16px;
-            color: white;
+            background: linear-gradient(145deg, #ff6b7a 0%, #ff4757 45%, #ff3838 100%);
+            border: none;
+            border-radius: 18px;
+            color: #fff;
             font-size: 0.7rem;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            box-shadow: 0 8px 25px rgba(110, 203, 255, 0.4), 0 0 20px rgba(110, 203, 255, 0.2);
+            box-shadow:
+                6px 6px 14px rgba(79, 70, 229, 0.35),
+                -4px -4px 12px rgba(255, 255, 255, 0.35);
             min-width: 80px;
         }
         
         .nav-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
-            border-radius: 16px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            display: none;
         }
         
         .nav-button:hover {
-            background: linear-gradient(135deg, rgba(110, 203, 255, 1) 0%, rgba(107, 182, 214, 1) 100%);
-            transform: translateY(-50%) scale(1.08);
-            box-shadow: 0 12px 35px rgba(110, 203, 255, 0.6), 0 0 30px rgba(110, 203, 255, 0.4);
+            box-shadow:
+                4px 4px 12px rgba(79, 70, 229, 0.32),
+                -3px -3px 10px rgba(255, 255, 255, 0.4);
         }
         
-        .nav-button:hover::before {
-            opacity: 1;
-        }
-        
-        .nav-button:active {
-            transform: translateY(-50%) scale(1.02);
-        }
         
         .nav-button i {
             font-size: 1.5rem;
@@ -2073,7 +1793,7 @@
             right: 10px;
         }
         
-        /* Ck Lottery Container - Matching Example Pattern */
+        /* TrxWin Wasite Container - Matching Example Pattern */
         .ck-lottery-container {
             position: fixed;
             top: 0;
@@ -2112,7 +1832,7 @@
             -webkit-backdrop-filter: none;
             border: none;
         }
-
+        
         .ck-lottery-container #ckLotteryIframe {
             position: relative;
             flex: 1;
@@ -2189,274 +1909,179 @@
                 font-size: 0.45rem;
             }
         }
-        /* Extra-small mobile tuning for key unlock page */
-        @media (max-width: 414px) {
-            .quantum-gate {
-                padding: 20px 16px;
-            }
-            .quantum-title {
-                font-size: 0.9rem;
-                letter-spacing: 0.15em;
-            }
-            .quantum-input {
-                padding: 12px 14px;
-                font-size: 0.8rem;
-                letter-spacing: 0.25em;
-            }
-            .quantum-button {
-                padding: 14px;
-                font-size: 0.8rem;
-                letter-spacing: 0.28em;
-            }
-            .quantum-timer {
-                padding: 10px;
-                font-size: 0.8rem;
-            }
-            .quantum-timer-text {
-                font-size: 0.8rem;
-            }
-            .telegram-button-wrapper .button {
-                font-size: 0.8rem;
-                height: 2.1em;
-                padding: 0.25em 0;
-            }
-            .telegram-button-wrapper .button p {
-                font-size: 0.75rem;
-            }
-        }
+        #navToWasiteBtn { display: none !important; }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <style id="global-trx-v11-light-ui">
-        /* Global TRX V1.1 – light shell + TRX red (allinone-aligned), loads after main.css */
-        body {
-            font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important;
-            background: #f1f5f9 !important;
-            background-image:
-                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 71, 87, 0.08), transparent),
-                radial-gradient(ellipse 60% 40% at 85% 100%, rgba(255, 71, 87, 0.05), transparent) !important;
-            color: #0f172a !important;
+    <style>
+        /* v1.2-size override: keep 1-1 features, reduce oversized UI */
+        .container.results-container {
+            max-width: 900px !important;
+            margin: 0 auto !important;
+            padding: 16px !important;
+            border-radius: 16px !important;
         }
-        .container {
-            background: #ffffff !important;
-            border: 1px solid rgba(255, 71, 87, 0.22) !important;
-            box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08) !important;
-        }
-        #resultsContainer h1,
-        .results-container h1 {
-            color: #ff4757 !important;
-        }
-        h1 {
-            color: #0f172a !important;
-            text-shadow: none !important;
+        .results-brand-header {
+            margin-bottom: 4px !important;
         }
         .subtitle {
-            color: #64748b !important;
+            margin-bottom: 12px !important;
+            font-size: 0.9rem !important;
         }
-        .title-subtitle span {
-            color: #475569 !important;
+        #resultsTimeRemaining {
+            margin-bottom: 12px !important;
+            padding: 8px 14px !important;
+            border-radius: 10px !important;
         }
-        #introAnimation {
-            background: #ffffff !important;
-            background-image:
-                radial-gradient(ellipse 120% 80% at 50% -30%, rgba(255, 71, 87, 0.1), transparent 55%),
-                radial-gradient(ellipse 90% 60% at 100% 100%, rgba(255, 71, 87, 0.07), transparent 50%) !important;
+        #resultsTimeRemaining span {
+            font-size: 0.9rem !important;
         }
-        .cosmic-bg {
-            background:
-                radial-gradient(circle at 25% 35%, rgba(255, 71, 87, 0.08), transparent 42%),
-                radial-gradient(circle at 75% 65%, rgba(255, 71, 87, 0.06), transparent 40%) !important;
-            opacity: 1 !important;
+        .prediction-box {
+            width: 100% !important;
+            padding: 16px !important;
+            border-radius: 12px !important;
+            margin-bottom: 20px !important;
         }
-        .logo-text-main {
-            color: #334155 !important;
-            font-family: 'Inter', sans-serif !important;
+        .prediction-title {
+            font-size: 0.9rem !important;
+            margin-bottom: 12px !important;
         }
-        .logo-text-sub {
-            color: #64748b !important;
-            font-family: 'Inter', sans-serif !important;
+        .prediction-row {
+            padding: 8px 0 !important;
         }
-        .lt-logo {
-            color: #ff4757 !important;
-            text-shadow: none !important;
+        .prediction-label {
+            font-size: 0.8rem !important;
         }
-        #gate {
-            background: #f1f5f9 !important;
-            background-image:
-                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 71, 87, 0.1), transparent),
-                radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 71, 87, 0.06), transparent) !important;
+        .prediction-value, .prediction-rate {
+            font-size: 0.95rem !important;
         }
-        #gate::before {
-            background: radial-gradient(60% 80% at 50% 20%, rgba(255, 71, 87, 0.12), transparent 60%) !important;
-            opacity: 1 !important;
+        #predSystemBox {
+            padding: 16px !important;
+            border-radius: 12px !important;
+            margin-bottom: 20px !important;
         }
-        .quantum-gate {
+        #resultsTable {
+            border: 1px solid var(--main-color-alpha-30) !important;
+            border-radius: 12px !important;
+            overflow-x: auto !important;
+            margin-bottom: 20px !important;
+            box-shadow: var(--neumo-inset-sm) !important;
+            -webkit-overflow-scrolling: touch;
+        }
+        #resultsTable table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            table-layout: auto !important;
+        }
+        #resultsTable th {
+            padding: 14px 12px !important;
+            font-size: 0.7rem !important;
+        }
+        #resultsTable td {
+            padding: 12px !important;
+            font-size: 0.85rem !important;
+        }
+        @media (max-width: 600px) {
+            .container.results-container {
+                padding: 16px 12px !important;
+            }
+            #resultsTable th, #resultsTable td {
+                padding: 10px 8px !important;
+                font-size: 0.75rem !important;
+            }
+            .prediction-box {
+                padding: 14px !important;
+            }
+        }
+        /* Final lock: make v1.1 key/prediction blocks match v1.2 exactly */
+        #gate .quantum-gate {
+            width: min(480px, 100%) !important;
+            padding: clamp(28px, 6vw, 48px) !important;
+            border-radius: 28px !important;
             background: #e4e9f0 !important;
-            border: 1px solid rgba(255, 71, 87, 0.28) !important;
-            box-shadow:
-                6px 6px 12px rgba(163, 177, 198, 0.52),
-                -6px -6px 12px rgba(255, 255, 255, 0.92) !important;
+            border: none !important;
+            box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.52), -6px -6px 12px rgba(255, 255, 255, 0.92) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 18px !important;
         }
-        .quantum-gate::before {
-            opacity: 0.35 !important;
+        #gate .gate-brand-header {
+            width: 100% !important;
+            text-align: left !important;
+            margin-bottom: 8px !important;
         }
-        .quantum-title {
-            color: #1e293b !important;
-            font-family: 'Inter', sans-serif !important;
+        #gate .gate-brand-header .quantum-title {
+            text-align: left !important;
+            margin-bottom: 4px !important;
+            font-size: clamp(1rem, 3.2vw, 1.25rem) !important;
+            letter-spacing: 0.04em !important;
+            white-space: normal !important;
+            color: var(--neumo-text) !important;
         }
-        .quantum-input {
-            background: #ffffff !important;
-            border: 2px solid rgba(255, 71, 87, 0.3) !important;
-            color: #1e293b !important;
-            box-shadow: inset 3px 3px 6px rgba(163, 177, 198, 0.52), inset -3px -3px 6px rgba(255, 255, 255, 0.92) !important;
-            font-family: 'Inter', sans-serif !important;
+        #gate .gate-brand-sub {
+            font-size: 0.8rem !important;
+            font-weight: 600 !important;
+            color: var(--neumo-muted) !important;
+            letter-spacing: 0.05em !important;
         }
-        .quantum-input::placeholder {
-            color: #94a3b8 !important;
-        }
-        .quantum-input:focus {
-            border-color: #ff4757 !important;
-            box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.2) !important;
-            background: #ffffff !important;
-        }
-        .quantum-button {
-            background: linear-gradient(145deg, #ff6b7a, #ff4757, #ff3838) !important;
+        #gate #keyInput.quantum-input {
+            padding: 18px 22px !important;
+            background: #fff !important;
+            border: 2px solid var(--main-color-alpha-30) !important;
             border-radius: 18px !important;
-            box-shadow: 6px 6px 14px rgba(255, 71, 87, 0.35) !important;
-            letter-spacing: 0.2em !important;
-            font-family: 'Inter', sans-serif !important;
+            font-size: 1rem !important;
+            letter-spacing: 0.3em !important;
+            box-shadow: var(--neumo-inset-sm) !important;
+            text-align: center !important;
         }
-        .quantum-button:hover {
-            box-shadow: 0 8px 24px rgba(255, 71, 87, 0.4) !important;
+        #gate #activateBtn.quantum-button {
+            padding: 18px !important;
+            border-radius: 18px !important;
+            font-size: 0.95rem !important;
+            letter-spacing: 0.3em !important;
+            text-transform: uppercase !important;
         }
-        .quantum-timer {
-            background: #ffffff !important;
-            border: 2px solid rgba(255, 71, 87, 0.28) !important;
-            color: #ff4757 !important;
-            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06) !important;
-        }
-        .quantum-timer-text {
-            color: #ff4757 !important;
-        }
-        .telegram-button-wrapper .button {
-            background: #ffffff !important;
-            border: 2px solid rgba(255, 71, 87, 0.25) !important;
-            color: #1e293b !important;
-        }
-        .telegram-button-wrapper .icon svg {
-            color: #ff4757 !important;
-        }
-        .container table {
-            border: 1px solid rgba(255, 71, 87, 0.18) !important;
-            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06) !important;
-        }
-        .container thead {
-            background: linear-gradient(145deg, #fff1f2, #ffe4e6) !important;
-        }
-        .container th {
-            color: #be123c !important;
-            border-bottom: 1px solid rgba(255, 71, 87, 0.22) !important;
-        }
-        .container td {
-            background: #ffffff !important;
-            color: #334155 !important;
-            border-bottom: 1px solid rgba(15, 23, 42, 0.06) !important;
-        }
-        .container tbody tr:hover {
-            background: rgba(255, 71, 87, 0.06) !important;
-            transform: none !important;
+        #predictionBox.prediction-box {
+            padding: 16px !important;
+            background: var(--main-color-alpha-10) !important;
+            border: 1px solid var(--main-color-alpha-30) !important;
+            border-radius: 12px !important;
+            margin-bottom: 20px !important;
             box-shadow: none !important;
+            width: 100% !important;
         }
-        .container tbody tr:nth-child(even) {
-            background: rgba(248, 250, 252, 0.95) !important;
+        #predictionBox .prediction-row {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            padding: 8px 0 !important;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.12) !important;
         }
-        .container .period-number,
-        .container td.period-number {
-            color: #0f172a !important;
+        #predictionBox .prediction-row:last-child { border-bottom: none !important; }
+        #predictionBox .prediction-label {
+            font-size: 0.8rem !important;
+            color: var(--muted) !important;
+            font-weight: 600 !important;
         }
-        .container td:nth-child(3) {
-            color: #334155 !important;
-        }
-        .container td.number-column {
-            color: #0f172a !important;
-        }
-        .count-label {
-            color: #64748b !important;
-            text-shadow: none !important;
-        }
-        .count-number {
-            color: #ff4757 !important;
-            text-shadow: none !important;
-        }
-        .container .prediction-box {
-            background: #ffffff !important;
-            border: 1px solid rgba(255, 71, 87, 0.22) !important;
-            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06) !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-        }
-        .container .prediction-title {
-            color: #ff4757 !important;
-            text-shadow: none !important;
-        }
-        .container .prediction-label {
-            color: #64748b !important;
-        }
-        .container .stats-merged {
-            background: #f8fafc !important;
-            border: 1px solid rgba(255, 71, 87, 0.2) !important;
-            box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.04) !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-        }
-        .container .stats-label-row {
-            color: #334155 !important;
-        }
-        button {
-            background: linear-gradient(145deg, #ff6b7a, #ff4757, #ff3838) !important;
-            color: #ffffff !important;
-            box-shadow: 0 4px 14px rgba(255, 71, 87, 0.35) !important;
-        }
-        button:hover {
-            box-shadow: 0 8px 20px rgba(255, 71, 87, 0.4) !important;
-        }
-        .container .premium-code {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
-            color: #0f172a !important;
-            border: 1px solid rgba(255, 71, 87, 0.2) !important;
-            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06) !important;
-        }
-        .last-update {
-            background: #ffffff !important;
-            color: #ff4757 !important;
-            border: 2px solid rgba(255, 71, 87, 0.25) !important;
+        #predictionBox .prediction-value,
+        #predictionBox .prediction-rate {
+            font-size: 0.95rem !important;
+            font-weight: 700 !important;
+            color: var(--neumo-text) !important;
+            font-family: ui-monospace, monospace !important;
+            text-align: right !important;
         }
     </style>
 </head>
-<body>
-    <!-- Intro Animation -->
-    <section id="introAnimation">
-        <div class="cosmic-bg" id="cosmicBg"></div>
-        <div class="intro-container">
-            <div class="logo-container">
-                <div class="lt-logo">
-                    <span class="letter-l">L</span><span class="letter-t">T</span>
-                </div>
-                <div class="logo-text-container">
-                    <div class="logo-text-main">Lottery Tricks Ai Perdition</div>
-                    <div class="logo-text-sub">Global TRX Mini V1.1</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
+<body class="light-mode">
     <!-- Quantum AI Key Unlock Gate -->
     <section id="gate">
         <div class="quantum-gate">
-            <h1 class="quantum-title">Lottery Tricks Ai Perdition</h1>
+            <div class="gate-brand-header">
+                <h1 class="quantum-title"><span class="brand-red">SuperSel</span> <span class="brand-black">Earing</span></h1>
+                <p class="gate-brand-sub">TrxWin1MiniV1.1</p>
+            </div>
             <input type="text" id="keyInput" class="quantum-input" placeholder="ENTER QUANTUM ACCESS KEY">
             <button class="quantum-button" id="activateBtn">
                 <i class="fas fa-key"></i> ACTIVATE QUANTUM CORE
@@ -2469,44 +2094,45 @@
                 </div>
                 <span class="quantum-timer-text" id="timerText"></span>
             </div>
-            <div class="telegram-button-wrapper">
-                <a href="https://t.me/LotteryTricksAiPrediction" target="_blank" style="text-decoration: none;">
-                    <button class="button">
-                        <div class="icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-telegram" viewBox="0 0 16 16">
-                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.287 5.906c-.778.324-2.334.994-4.666 2.01-.378.15-.577.298-.595.442-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294.26.006.549-.1.868-.32 2.179-1.471 3.304-2.214 3.374-2.23.05-.012.12-.026.166.016.047.041.042.12.037.141-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8.154 8.154 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629.093.06.183.125.27.187.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.426 1.426 0 0 0-.013-.315.337.337 0 0 0-.114-.217.526.526 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09z"></path>
-                            </svg>
-                        </div>
-                        <p>Telegram Channel</p>
-                    </button>
-                </a>
-            </div>
             <div id="key-content" class="quantum-success">
                 <div class="success-icon">
                     <i class="fas fa-check-circle"></i>
                 </div>
-                <h3 style="margin-bottom: 8px; color: #6ecbff; font-size: 1rem;">QUANTUM ACCESS GRANTED</h3>
-                <p style="color: #6ecbff; margin-bottom: 12px; font-size: 0.75rem;">Neural network initialized successfully</p>
+                <h3 style="margin-bottom: 8px; color: #ff6b7a; font-size: 1rem;">QUANTUM ACCESS GRANTED</h3>
+                <p style="color: #ff6b7a; margin-bottom: 12px; font-size: 0.75rem;">Neural network initialized successfully</p>
             </div>
         </div>
     </section>
 
-    <!-- Results Container -->
+    <!-- Results Container (Hidden until unlocked) -->
     <div class="container results-container" id="resultsContainer">
-        <h1>Lottery Tricks Ai Perdition</h1>
-        <div class="title-subtitle">
-            <span>Global TRX Mini V1.1</span>
+        <div class="results-brand-header">
+            <h1 class="results-brand-title"><span class="brand-red">SuperSel</span> <span class="brand-black">Earing</span></h1>
+            <p class="results-brand-sub">TrxWin1MiniV1.1</p>
         </div>
         <p class="subtitle">
-            <span class="realtime-indicator">● LIVE</span>
+            <span class="realtime-indicator">? LIVE</span>
             Live - DataBase
         </p>
 
-        <div id="status" class="status" style="display: none;"></div>
+        <!-- Time Remaining Display on Results Page - Enhanced with Glassmorphism -->
+        <div id="resultsTimeRemaining" style="text-align: center; margin-bottom: 12px; padding: 12px 16px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 107, 122, 0.3); border-radius: 12px; box-shadow: 0 4px 15px rgba(255, 107, 122, 0.15); display: none; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease;">
+            <div class="loader" style="width: 32px; height: 32px; border-width: 3px; margin-right: 0; border-color: rgba(255, 107, 122, 0.2);">
+                <span class="hour" style="width: 3px; height: 10px; top: 12px; left: 11px; background: var(--main-color);"></span>
+                <span class="min" style="width: 3px; height: 8px; top: 12px; left: 11px; background: var(--main-color);"></span>
+                <span class="circel" style="width: 5px; height: 5px; top: 10px; left: 10px; background: var(--main-color);"></span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <span style="color: var(--white-bg); font-weight: 700; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; opacity: 0.9;">Time Remaining</span>
+                <span id="resultsTimeText" style="color: var(--main-color); font-weight: 800; font-size: 14px; letter-spacing: 0.5px; font-family: 'Orbitron', sans-serif;"></span>
+            </div>
+        </div>
 
+        <div id="status" class="status" style="display: none;"></div>
+        
         <!-- Prediction Box -->
         <div id="predictionBox" class="prediction-box">
-            <div class="prediction-title">Global TRX</div>
+            <div class="prediction-title">TrxWin 1</div>
             <div class="prediction-row">
                 <span class="prediction-label">Period</span>
                 <span id="predPeriod" class="prediction-value">-</span>
@@ -2521,68 +2147,61 @@
             </div>
         </div>
 
-        <!-- Merged Stats Box -->
-        <div id="mergedStats" class="stats-merged">
-            <div class="stats-row">
-                <div class="stats-label-row">
-                    <span>BIG Count</span>
-                    <span id="bigCount">0</span>
-                </div>
-                <div class="loading-bar-container">
-                    <div class="loading-bar yellow" id="bigCountBar"></div>
-                </div>
-            </div>
-            
-            <div class="stats-row">
-                <div class="stats-label-row">
-                    <span>SMALL Count</span>
-                    <span id="smallCount">0</span>
-                </div>
-                <div class="loading-bar-container">
-                    <div class="loading-bar yellow" id="smallCountBar"></div>
-                </div>
-            </div>
+        <!-- Prediction System (v1.2-style; replaces BIG/SMALL count loading bars) -->
+        <div id="predSystemBox" class="ck12-pred-system-box">
+            <div class="ck12-pred-system-title">Prediction System</div>
+            <div id="predSystemContent"></div>
         </div>
 
         <div id="resultsTable"></div>
         <div id="lastUpdate" class="last-update" style="display: none;"></div>
     </div>
+    
+        <!-- TrxWin Wasite Container (Hidden by default) - Moved outside resultsContainer -->
+        <div id="ckLotteryContainer" class="ck-lottery-container" style="display: none;">
+        <!-- Prediction Box for TrxWin Wasite -->
+        <div id="ckLotteryPredictionBox" class="prediction-box">
+            <div class="prediction-title">TrxWin 1</div>
+            <div class="prediction-row">
+                <span class="prediction-label">Period</span>
+                <span id="ckLotteryPredPeriod" class="prediction-value">-</span>
+            </div>
+            <div class="prediction-row">
+                <span class="prediction-label">Prediction</span>
+                <span id="ckLotteryPredResult" class="prediction-value">-</span>
+            </div>
+            <div class="prediction-row">
+                <span class="prediction-label">Rate</span>
+                <span id="ckLotteryPredRate" class="prediction-rate">-</span>
+            </div>
+        </div>
+        
+        <!-- Iframe for TrxWin Wasite -->
+        <iframe 
+            id="ckLotteryIframe" 
+            src="https://www.bigwingame.cc/#/register?invitationCode=22884102596" 
+            title="TrxWin Wasite" 
+            frameborder="0"
+            allowfullscreen
+            loading="eager">
+        </iframe>
+    </div>
+    
+    <!-- Navigation Button for View Page (Center Right) -->
+    <button id="navToWasiteBtn" class="nav-button nav-button-right" style="display: none;">
+        <i class="fas fa-globe"></i>
+        <span>TrxWin Wasite</span>
+    </button>
+    
+    <!-- Navigation Button for TrxWin Wasite (Center Left) -->
+    <button id="navToViewBtn" class="nav-button nav-button-left" style="display: none;">
+        <i class="fas fa-home"></i>
+        <span>View Page</span>
+    </button>
+    </div>
+    </div>
 
     <script>
-        // ========== INTRO ANIMATION CONTROL ==========
-        function createCosmicParticles() {
-            const cosmicBg = document.getElementById('cosmicBg');
-            const particleCount = 40; // More particles for premium effect
-            
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 10 + 's';
-                particle.style.animationDuration = (8 + Math.random() * 8) + 's';
-                // Add random 3D depth
-                const depth = Math.random() * 300;
-                particle.style.transform = `translateZ(${depth}px)`;
-                cosmicBg.appendChild(particle);
-            }
-        }
-        
-        function startIntroAnimation() {
-            createCosmicParticles();
-            
-            setTimeout(() => {
-                const introEl = document.getElementById('introAnimation');
-                if (!introEl) return;
-                introEl.classList.add('fade-out');
-                
-                setTimeout(() => {
-                    introEl.style.display = 'none';
-                    document.getElementById('gate').style.display = 'block';
-                    initializeAfterIntro();
-                }, 700);
-            }, 2300);
-        }
-        
         function initializeAfterIntro() {
             // Set up unlock button handler
             document.getElementById("activateBtn").addEventListener("click", activateKey);
@@ -2597,27 +2216,21 @@
                         startSession();
                         startKeyMonitoring(activatedKeyId);
                     } else {
-                        // Show gate if not unlocked
+                        // Show gate if not unlocked (already shown)
                         document.getElementById("gate").style.display = "block";
                         document.getElementById("resultsContainer").classList.remove("unlocked");
                         // Clear invalid stored data
                         if (!expireTime || !activatedKeyId) {
-                            localStorage.removeItem('expireTime');
-                            localStorage.removeItem('activatedKeyId');
+                            localStorage.removeItem(SHARED_EXPIRE_KEY);
+                            localStorage.removeItem(SHARED_ACTIVATED_KEY);
                         }
                     }
                     
                     // Initialize results Firebase
                     if (initializeFirebase()) {
-                        // Initialize prediction Firebase
-                        initializePredictionFirebase();
-                        
                         // Only auto-connect if unlocked
                         if (expireTime && getServerTime() < expireTime && activatedKeyId) {
-                            setTimeout(() => {
-                                connectFirebase();
-                                connectPredictionFirebase();
-                            }, 500);
+                            setTimeout(connectFirebase, 500);
                         }
                     }
                 }, 500);
@@ -2629,54 +2242,46 @@
         }
         
         // ========== QUANTUM AI KEY UNLOCK FUNCTIONALITY ==========
-        // Firebase configs for key validation - check multiple projects
-        const loginConfigCkAdm = {
-            apiKey: "AIzaSyAy3QvFmhKiOX38MZiINfZq2yYXGhb7uL8",
-            authDomain: "ck-adm.firebaseapp.com",
-            databaseURL: "https://ck-adm-default-rtdb.europe-west1.firebasedatabase.app/",
-            projectId: "ck-adm",
-            storageBucket: "ck-adm.appspot.com",
-            messagingSenderId: "192822942347",
-            appId: "1:192822942347:web:f27eee393e16c84544528e"
-        };
-        
-        const loginConfigLotteryoo = {
+        const loginConfig = {
             apiKey: "AIzaSyBynBT5W_C6rNVEUB4j7ABiJQeSfQGU4Mo",
             authDomain: "lotteryoo.firebaseapp.com",
-            databaseURL: "https://lotteryoo-default-rtdb.europe-west1.firebasedatabase.app/",
+            databaseURL: "https://lotteryoo-default-rtdb.europe-west1.firebasedatabase.app",
             projectId: "lotteryoo",
             storageBucket: "lotteryoo.firebasestorage.app",
             messagingSenderId: "72782915477",
-            appId: "1:72782915477:web:011fc0a614aff7c666b89c",
-            measurementId: "G-M06SN8YLD3"
+            appId: "1:72782915477:web:011fc0a614aff7c666b89c"
         };
         
-        let loginAppCkAdm = null;
-        let loginDbCkAdm = null;
-        let loginAppLotteryoo = null;
-        let loginDbLotteryoo = null;
+        const SHARED_EXPIRE_KEY = 'bigwinShared_expireTime';
+        const SHARED_ACTIVATED_KEY = 'bigwinShared_activatedKeyId';
+        const LEGACY_EXPIRE_KEYS = ['bw1ExpireTime', 'bw30ExpireTime', 'expireTime'];
+        const LEGACY_ACTIVATED_KEYS = ['bw1ActivatedKeyId', 'bw30ActivatedKeyId', 'activatedKeyId'];
+        function getFirstStoredValue(keys) {
+            for (const key of keys) {
+                const value = localStorage.getItem(key);
+                if (value) return value;
+            }
+            return null;
+        }
+        let loginApp = null;
+        let loginDb = null;
         let serverOffset = 0;
-        let expireTime = parseInt(localStorage.getItem('expireTime')) || 0;
-        let activatedKeyId = localStorage.getItem('activatedKeyId') || null;
+        let expireTime = parseInt(localStorage.getItem(SHARED_EXPIRE_KEY) || getFirstStoredValue(LEGACY_EXPIRE_KEYS) || '0', 10) || 0;
+        let activatedKeyId = localStorage.getItem(SHARED_ACTIVATED_KEY) || getFirstStoredValue(LEGACY_ACTIVATED_KEYS) || null;
+        if (expireTime > 0) localStorage.setItem(SHARED_EXPIRE_KEY, String(expireTime));
+        if (activatedKeyId) localStorage.setItem(SHARED_ACTIVATED_KEY, activatedKeyId);
         let timerInterval = null;
         let keyStatusListener = null;
-        let currentLoginDb = null;
         
         // Get server time (to prevent client time manipulation)
         const getServerTime = () => Date.now() + serverOffset;
         
         function initializeLoginFirebase() {
             try {
-                // Initialize CK-ADM Firebase (for CK and 6Wingo keys)
-                loginAppCkAdm = firebase.initializeApp(loginConfigCkAdm, 'loginCkAdm');
-                loginDbCkAdm = loginAppCkAdm.database();
-                
-                // Initialize Lotteryoo Firebase (for BigWin keys)
-                loginAppLotteryoo = firebase.initializeApp(loginConfigLotteryoo, 'loginLotteryoo');
-                loginDbLotteryoo = loginAppLotteryoo.database();
-                
-                // Get server time offset from CK-ADM (both use same offset concept)
-                loginDbCkAdm.ref(".info/serverTimeOffset").on("value", snapshot => {
+                loginApp = firebase.initializeApp(loginConfig, 'bw1Login');
+                loginDb = loginApp.database();
+                // Get server time offset to prevent time manipulation
+                loginDb.ref(".info/serverTimeOffset").on("value", snapshot => {
                     serverOffset = snapshot?.val() || 0;
                 });
                 return true;
@@ -2698,7 +2303,7 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> VERIFYING...';
             btn.disabled = true;
             
-            if (!loginDbCkAdm || !loginDbLotteryoo) {
+            if (!loginDb) {
                 if (!initializeLoginFirebase()) {
                     btn.innerHTML = originalText;
                     btn.disabled = false;
@@ -2707,51 +2312,32 @@
                 }
             }
             
-            // Check key in both Firebase projects - accept all key types (ck, bigwin, 6wingo)
-            const checkCkAdm = loginDbCkAdm.ref('keys/' + key).once('value');
-            const checkLotteryoo = loginDbLotteryoo.ref('keys/' + key).once('value');
-            
-            Promise.all([checkCkAdm, checkLotteryoo]).then(([ckAdmSnapshot, lotteryooSnapshot]) => {
+            loginDb.ref('keys/' + key).once('value').then(snapshot => {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
                 
-                let keyData = null;
-                let keyDb = null;
-                
-                // Check CK-ADM first (for CK and 6Wingo keys)
-                if (ckAdmSnapshot.exists()) {
-                    const data = ckAdmSnapshot.val();
-                    // Accept CK and 6Wingo keys
-                    if (data.keyType === "ck" || data.keyType === "6wingo") {
-                        keyData = data;
-                        keyDb = loginDbCkAdm;
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    
+                    // Require explicit TrxWin key type (reject keys without keyType or non-bigwin)
+                    if (data.keyType !== "bigwin") {
+                        alert("Invalid key type. This page requires a TrxWin key.");
+                        return;
                     }
-                }
-                
-                // Check Lotteryoo (for BigWin keys)
-                if (!keyData && lotteryooSnapshot.exists()) {
-                    const data = lotteryooSnapshot.val();
-                    // Accept BigWin keys
-                    if (data.keyType === "bigwin") {
-                        keyData = data;
-                        keyDb = loginDbLotteryoo;
-                    }
-                }
-                
-                if (keyData && keyDb) {
-                    if (keyData.used) {
+                    
+                    if (data.used) {
                         alert("This quantum key has already been used!");
                         return;
                     }
                     
-                    const extraTime = keyData.duration * 60 * 1000;
+                    const extraTime = data.duration * 60 * 1000;
                     // Use server time to prevent manipulation
                     const currentServerTime = getServerTime();
                     expireTime = Math.max(currentServerTime, expireTime) + extraTime;
-                    localStorage.setItem('expireTime', expireTime);
+                    localStorage.setItem(SHARED_EXPIRE_KEY, String(expireTime));
                     
                     // Store server timestamp when key is activated
-                    keyDb.ref('keys/' + key).update({ 
+                    loginDb.ref('keys/' + key).update({ 
                         used: true,
                         activatedAt: firebase.database.ServerValue.TIMESTAMP,
                         expiresAt: expireTime
@@ -2759,16 +2345,15 @@
                     
                     // Store activated key ID for monitoring
                     activatedKeyId = key;
-                    localStorage.setItem('activatedKeyId', key);
-                    currentLoginDb = keyDb;
+                    localStorage.setItem(SHARED_ACTIVATED_KEY, key);
                     
                     document.getElementById('key-content').style.display = 'block';
-                    alert(`Quantum Access Activated! Added ${keyData.duration} minutes`);
+                    alert(`Quantum Access Activated! Added ${data.duration} minutes`);
                     document.getElementById('keyInput').value = '';
                     startSession();
-                    startKeyMonitoring(key, keyDb);
+                    startKeyMonitoring(key);
                 } else {
-                    alert("Invalid Quantum Key or Key Type Not Supported");
+                    alert("Invalid Quantum Key");
                 }
             }).catch(error => {
                 btn.innerHTML = originalText;
@@ -2791,22 +2376,25 @@
             const gate = document.getElementById("gate");
             const resultsContainer = document.getElementById("resultsContainer");
             const timerEl = document.getElementById('key-timer');
+            const resultsTimeEl = document.getElementById('resultsTimeRemaining');
+            const resultsTimeText = document.getElementById('resultsTimeText');
             
             if (remaining <= 0) {
                 clearInterval(timerInterval);
-                if (timerEl) timerEl.textContent = "Quantum Access Expired";
+                timerEl.textContent = "Quantum Access Expired";
                 document.getElementById('key-content').style.display = 'none';
+                if (resultsTimeEl) resultsTimeEl.style.display = 'none';
                 gate.style.display = "block";
                 resultsContainer.classList.remove("unlocked");
-                localStorage.removeItem('expireTime');
-                localStorage.removeItem('activatedKeyId');
+                localStorage.removeItem(SHARED_EXPIRE_KEY);
+                localStorage.removeItem(SHARED_ACTIVATED_KEY);
                 activatedKeyId = null;
                 if (firebaseListener && db) {
                     db.ref(FIREBASE_PATH).off('value', firebaseListener);
                     firebaseListener = null;
                 }
-                if (keyStatusListener && currentLoginDb && activatedKeyId) {
-                    currentLoginDb.ref('keys/' + activatedKeyId).off('value', keyStatusListener);
+                if (keyStatusListener && loginDb && activatedKeyId) {
+                    loginDb.ref('keys/' + activatedKeyId).off('value', keyStatusListener);
                     keyStatusListener = null;
                 }
                 return;
@@ -2825,29 +2413,34 @@
                 timerEl.style.display = 'flex';
             }
             
+            // Update results page time display
+            if (resultsTimeEl && resultsTimeText) {
+                resultsTimeText.textContent = timeText;
+                resultsTimeEl.style.display = 'block';
+            }
+            
             gate.style.display = "none";
             resultsContainer.classList.add("unlocked");
             
+            // Show bottom menu when unlocked
+            // Navigation buttons are handled by setupMenuButtons
+            
             if (db && !firebaseListener) {
-                setTimeout(() => {
-                    connectFirebase();
-                    connectPredictionFirebase();
-                }, 500);
+                setTimeout(connectFirebase, 500);
             }
         }
         
         // Monitor key status in Firebase for deactivation
-        function startKeyMonitoring(keyId, keyDb) {
-            if (!keyDb || !keyId) return;
-            currentLoginDb = keyDb;
+        function startKeyMonitoring(keyId) {
+            if (!loginDb || !keyId) return;
             
             // Remove existing listener if any
-            if (keyStatusListener && activatedKeyId && currentLoginDb) {
-                currentLoginDb.ref('keys/' + activatedKeyId).off('value', keyStatusListener);
+            if (keyStatusListener && activatedKeyId) {
+                loginDb.ref('keys/' + activatedKeyId).off('value', keyStatusListener);
             }
             
             // Listen for key status changes
-            keyStatusListener = keyDb.ref('keys/' + keyId).on('value', (snapshot) => {
+            keyStatusListener = loginDb.ref('keys/' + keyId).on('value', (snapshot) => {
                 if (!snapshot.exists()) {
                     // Key was deleted from Firebase - check local expiration time first
                     const remaining = expireTime - getServerTime();
@@ -2901,16 +2494,16 @@
         function redirectToUnlock(reason) {
             // Stop all timers and listeners
             if (timerInterval) clearInterval(timerInterval);
-            if (keyStatusListener && currentLoginDb && activatedKeyId) {
-                currentLoginDb.ref('keys/' + activatedKeyId).off('value', keyStatusListener);
+            if (keyStatusListener && loginDb && activatedKeyId) {
+                loginDb.ref('keys/' + activatedKeyId).off('value', keyStatusListener);
             }
             if (firebaseListener && db) {
                 db.ref(FIREBASE_PATH).off('value', firebaseListener);
             }
             
             // Clear storage
-            localStorage.removeItem('expireTime');
-            localStorage.removeItem('activatedKeyId');
+            localStorage.removeItem(SHARED_EXPIRE_KEY);
+            localStorage.removeItem(SHARED_ACTIVATED_KEY);
             expireTime = 0;
             activatedKeyId = null;
             
@@ -2919,13 +2512,16 @@
             
             const gate = document.getElementById("gate");
             const resultsContainer = document.getElementById("resultsContainer");
+            const resultsTimeEl = document.getElementById('resultsTimeRemaining');
             
+            if (resultsTimeEl) resultsTimeEl.style.display = 'none';
             gate.style.display = "block";
             resultsContainer.classList.remove("unlocked");
             document.getElementById('key-content').style.display = 'none';
         }
         
         // ========== RESULTS FIREBASE CONFIGURATION ==========
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDj6z3O91NnlQ1zVdripiGhqQMsQhR4_ak",
             authDomain: "ck30-35e97.firebaseapp.com",
@@ -2937,136 +2533,83 @@
             measurementId: "G-6Z7DYPKHR2"
         };
 
+        // Firebase path
         const FIREBASE_PATH = "globaltrx/default";
-        
-        // Firebase Realtime Database config for predictions (same as Mini1-1.js uses)
-        const PREDICTION_FIREBASE_CONFIG = {
-            apiKey: "AIzaSyBMRKbOavHAQTbufOjcAbnSxZH89-SeGek",
-            authDomain: "chackchack-d7445.firebaseapp.com",
-            databaseURL: "https://chackchack-d7445-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "chackchack-d7445",
-            storageBucket: "chackchack-d7445.firebasestorage.app",
-            messagingSenderId: "533782546151",
-            appId: "1:533782546151:web:13050e49252ca127388442"
-        };
-        
-        const PREDICTION_CHANNEL_KEY = 'GLOBALTRXMINI1_HTML';
 
         let db = null;
         let currentResults = [];
         let firebaseListener = null;
-        let predictionDb = null;
-        let predictionFirebaseApp = null;
-        let predictionListener = null;
+        let predSystemTimeout = null;
+        let lastPredSystemPeriodKey = null;
 
-        // Initialize Firebase (results DB)
+        function showPredictionSystemData(results) {
+            const sysEl = document.getElementById('predSystemContent');
+            const boxEl = document.getElementById('predSystemBox');
+            if (!sysEl) return;
+            if (!results || results.length === 0) {
+                sysEl.innerHTML = '<div class="ck12-pred-system-row"><span class="ck12-pred-system-label">No data</span><span class="ck12-pred-system-value">-</span></div>';
+                if (boxEl) boxEl.style.display = 'none';
+                return;
+            }
+            if (boxEl) boxEl.style.display = 'block';
+            const nextPrediction = calculatePrediction(results);
+            let rate = null;
+            if (results.length >= 6) {
+                rate = calculateRate(results);
+            } else if (results.length > 0) {
+                rate = calculateRateFromNumber(results[0].number);
+            }
+            const last5 = results.slice(0, Math.min(5, results.length));
+            const analysisPattern = last5.map(r => classifyBigSmall(r.number)).filter(Boolean).join(' -> ');
+            const np = nextPrediction || '-';
+            const npClass = np === 'BIG' ? 'psys-pred-big' : (np === 'SMALL' ? 'psys-pred-small' : '');
+            let sysHtml = '<div class="ck12-pred-system-content">';
+            sysHtml += '<div class="ck12-pred-system-row"><span class="ck12-pred-system-label">Analysis (Last 5 B/S)</span><span class="ck12-pred-system-value">' + (analysisPattern || '-') + '</span></div>';
+            sysHtml += '<div class="ck12-pred-system-row"><span class="ck12-pred-system-label">Next Prediction</span><span class="ck12-pred-system-value ' + npClass + '">' + np + '</span></div>';
+            sysHtml += '<div class="ck12-pred-system-row"><span class="ck12-pred-system-label">Accuracy Rate</span><span class="ck12-pred-system-value">' + (rate != null ? rate : '-') + '</span></div>';
+            sysHtml += '</div>';
+            sysEl.innerHTML = sysHtml;
+        }
+
+        function schedulePredictionSystemUpdate(results) {
+            const sysEl = document.getElementById('predSystemContent');
+            const latest = results && results[0];
+            const issueNum = latest ? (latest.period ?? latest.issueNumber ?? latest.periodNumber ?? '') : '';
+            const periodKey = String(issueNum ?? '');
+            if (predSystemTimeout) {
+                clearTimeout(predSystemTimeout);
+                predSystemTimeout = null;
+            }
+            if (!results || results.length === 0 || !sysEl) {
+                showPredictionSystemData(null);
+                lastPredSystemPeriodKey = null;
+                return;
+            }
+            const isNewPeriod = periodKey && periodKey !== lastPredSystemPeriodKey;
+            if (isNewPeriod) {
+                lastPredSystemPeriodKey = periodKey;
+                sysEl.innerHTML = '<div class="ck12-pred-system-loading">Analysis<span class="dots"><span></span><span></span><span></span></span></div>';
+                predSystemTimeout = setTimeout(function () {
+                    predSystemTimeout = null;
+                    showPredictionSystemData(results);
+                }, 420);
+            } else {
+                showPredictionSystemData(results);
+            }
+        }
+
+        // Initialize Firebase
         function initializeFirebase() {
             try {
-                if (db) {
-                    return true;
-                }
-
-                let resultsApp = null;
-
-                // Reuse existing named app if it already exists
-                if (firebase.apps && firebase.apps.length) {
-                    for (let i = 0; i < firebase.apps.length; i++) {
-                        if (firebase.apps[i].name === 'globaltrxResults') {
-                            resultsApp = firebase.apps[i];
-                            break;
-                        }
-                    }
-                }
-
-                // Otherwise create a dedicated app for Global TRX results
-                if (!resultsApp) {
-                    resultsApp = firebase.initializeApp(firebaseConfig, 'globaltrxResults');
-                }
-
-                db = resultsApp.database();
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
                 return true;
             } catch (error) {
                 console.error('Firebase initialization error:', error);
-                // Status message hidden in UI, but keep log for debugging
-                // showStatus(`❌ Firebase initialization failed: ${error.message}`, 'error');
+                showStatus(`❌ Firebase initialization failed: ${error.message}`, 'error');
                 return false;
             }
         }
-        
-        // Initialize Prediction Firebase (for reading predictions from Mini1-1.js)
-        function initializePredictionFirebase() {
-            try {
-                if (typeof firebase === 'undefined') {
-                    console.error('❌ Firebase SDK not loaded for predictions');
-                    return false;
-                }
-
-                if (predictionDb) {
-                    return true;
-                }
-
-                if (!predictionFirebaseApp) {
-                    if (firebase.apps && firebase.apps.length) {
-                        for (let i = 0; i < firebase.apps.length; i++) {
-                            if (firebase.apps[i].name === 'globaltrxPrediction') {
-                                predictionFirebaseApp = firebase.apps[i];
-                                break;
-                            }
-                        }
-                    }
-                    if (!predictionFirebaseApp) {
-                        predictionFirebaseApp = firebase.initializeApp(PREDICTION_FIREBASE_CONFIG, 'globaltrxPrediction');
-                    }
-                }
-
-                predictionDb = predictionFirebaseApp.database();
-                return true;
-            } catch (error) {
-                console.error('❌ Prediction Firebase init failed:', error);
-                return false;
-            }
-        }
-        
-        // Connect to Firebase Realtime Database to read predictions
-        function connectPredictionFirebase() {
-            if (!predictionDb) {
-                if (!initializePredictionFirebase()) {
-                    console.warn('⚠️ Prediction Firebase not ready, cannot read predictions.');
-                    return;
-                }
-            }
-
-            try {
-                // Remove existing listener if any
-                if (predictionListener && predictionDb) {
-                    predictionDb.ref('predictions/' + PREDICTION_CHANNEL_KEY).off('value', predictionListener);
-                    predictionListener = null;
-                }
-
-                // Set up real-time listener for predictions
-                predictionListener = predictionDb.ref('predictions/' + PREDICTION_CHANNEL_KEY).on('value', (snapshot) => {
-                    const predictionData = snapshot.val();
-                    
-                    if (predictionData && predictionData.period && predictionData.predictionValue) {
-                        // Update prediction box with data from Firebase
-                        setPredictionDisplay(
-                            predictionData.period || '-',
-                            predictionData.predictionValue || null,
-                            predictionData.rate || null
-                        );
-                        togglePredictionBox(true);
-                    } else {
-                        // No prediction data from Firebase, use client-side calculation
-                        // This will be handled by updatePredictionPanel in updateStats
-                    }
-                }, (error) => {
-                    console.error('❌ Prediction Firebase read error:', error);
-                });
-            } catch (error) {
-                console.error('❌ Error connecting to Prediction Firebase:', error);
-            }
-        }
-
 
         function showStatus(message, type) {
             const statusEl = document.getElementById('status');
@@ -3096,63 +2639,41 @@
             }
         }
 
-        // Simple prediction calculation (Ck BigWin 6 style)
+        // Prediction Logic - Updated to work with fewer results
         function calculatePrediction(historyData) {
             if (!historyData || historyData.length < 2) return null;
-            
             const window = historyData.slice(0, Math.min(5, historyData.length));
             let big = 0;
             let small = 0;
-            
             window.forEach((item) => {
                 const value = classifyBigSmall(item.number);
                 if (value === 'BIG') big += 1;
                 else if (value === 'SMALL') small += 1;
             });
-            
             if (big === small) return null;
-            
-            // Reverse strategy: if majority is BIG, predict SMALL (and vice versa)
-            if (big >= small) {
-                return 'SMALL';
-            } else {
-                return 'BIG';
-            }
+            return big >= small ? 'SMALL' : 'BIG';
         }
         
         // Calculate Rate based on last 3 predictions accuracy
         function calculateRate(historyData) {
             if (!historyData || historyData.length < 6) return null;
-            
             let correctCount = 0;
             let totalChecked = 0;
-            
-            // Check last 3 predictions
             for (let i = 0; i < 3 && i + 5 < historyData.length; i++) {
                 const historyForPrediction = historyData.slice(i + 1);
                 const predictedValue = calculatePrediction(historyForPrediction);
                 const actualResult = historyData[i];
                 const actualBigSmall = classifyBigSmall(actualResult.number);
-                
                 if (predictedValue && actualBigSmall) {
-                    if (predictedValue === actualBigSmall) {
-                        correctCount++;
-                    }
+                    if (predictedValue === actualBigSmall) correctCount++;
                     totalChecked++;
                 }
             }
-            
             if (totalChecked === 0) return null;
-            
             const accuracyRate = (correctCount / totalChecked) * 100;
-            
-            if (accuracyRate < 33) {
-                return 'Low';
-            } else if (accuracyRate <= 66) {
-                return 'Medium';
-            } else {
-                return 'High';
-            }
+            if (accuracyRate < 33) return 'Low';
+            if (accuracyRate <= 66) return 'Medium';
+            return 'High';
         }
 
         function calculateRateFromNumber(number) {
@@ -3163,22 +2684,15 @@
             return (lastDigit === 5 || lastDigit === 0) ? 'Low' : 'Medium';
         }
 
-        // Simple prediction calculation (Ck BigWin 6 style - no complex logic)
         function computeGlobalPredictionDetails(historyData) {
             if (!historyData || historyData.length < 1) return null;
-
             const latest = historyData[0];
-            
-            // Calculate period
             const periodSource = (latest.period ?? latest.issueNumber ?? latest.periodNumber ?? '').toString();
             const shortCurrent = parseInt(periodSource.slice(-3), 10);
             const nextShort = Number.isNaN(shortCurrent)
                 ? '-'
                 : String(shortCurrent + 1).padStart(3, '0').slice(-3);
-
-            // Simple prediction: Check last 5 results, reverse strategy
             const prediction = calculatePrediction(historyData);
-            
             return {
                 nextPeriod: nextShort,
                 finalPrediction: prediction,
@@ -3191,19 +2705,16 @@
                 predictionBox.style.display = hasData ? 'block' : 'none';
             }
         }
-        
+
         function setPredictionDisplay(periodValue, predictionValue, rateValue) {
             const normalizedPeriod = periodValue ?? '-';
             const normalizedPrediction = predictionValue ? predictionValue.toUpperCase() : '-';
             const normalizedRateText = rateValue ?? '-';
             const normalizedRateClass = rateValue ? rateValue.toLowerCase() : null;
-            
             const periodEl = document.getElementById('predPeriod');
             const resultEl = document.getElementById('predResult');
             const rateEl = document.getElementById('predRate');
-            
             if (periodEl) periodEl.textContent = normalizedPeriod;
-            
             if (resultEl) {
                 resultEl.textContent = normalizedPrediction;
                 resultEl.classList.remove('big', 'small');
@@ -3211,7 +2722,6 @@
                     resultEl.classList.add(normalizedPrediction === 'BIG' ? 'big' : 'small');
                 }
             }
-            
             if (rateEl) {
                 rateEl.textContent = normalizedRateText;
                 rateEl.classList.remove('low', 'medium', 'high');
@@ -3219,29 +2729,25 @@
                     rateEl.classList.add(normalizedRateClass);
                 }
             }
+            // Keep copy panel in sync
+            setPredictionDisplays(normalizedPeriod, predictionValue, rateValue);
         }
-        
+
         function updatePredictionPanel(historyData) {
-            // Always use local client-side calculation for V1.1
             const details = computeGlobalPredictionDetails(historyData);
-            
             if (!details || !historyData || historyData.length === 0) {
                 setPredictionDisplay('-', '-', '-');
                 togglePredictionBox(false);
                 return;
             }
-            
             const period = details.nextPeriod || '-';
             const prediction = details.finalPrediction || null;
-            
             let rate = null;
             if (historyData && historyData.length >= 6) {
                 rate = calculateRate(historyData);
             } else if (historyData && historyData.length > 0) {
-                const latestNumber = historyData[0].number;
-                rate = calculateRateFromNumber(latestNumber);
+                rate = calculateRateFromNumber(historyData[0].number);
             }
-            
             setPredictionDisplay(period, prediction, rate);
             togglePredictionBox(true);
         }
@@ -3255,29 +2761,59 @@
             if (!actual || !details || !details.finalPrediction) return null;
             return details.finalPrediction === actual ? 'WIN' : 'LOSE';
         }
+        
+        function togglePredictionBoxes(hasData) {
+            const mainPrediction = document.getElementById('predictionBox');
+            const wasitePrediction = document.getElementById('ckLotteryPredictionBox');
+            
+            if (mainPrediction) {
+                mainPrediction.style.display = 'flex';
+            }
+            
+            if (wasitePrediction) {
+                wasitePrediction.style.display = hasData ? 'flex' : 'none';
+            }
+        }
+        
+        function setPredictionDisplays(periodValue, predictionValue, rateValue) {
+            const normalizedPeriod = periodValue ?? '-';
+            const normalizedPrediction = predictionValue ? predictionValue.toUpperCase() : '-';
+            const normalizedRateText = rateValue ?? '-';
+            const normalizedRateClass = rateValue ? rateValue.toLowerCase() : null;
+            
+            ['predPeriod', 'ckLotteryPredPeriod'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = normalizedPeriod;
+            });
+            
+            ['predResult', 'ckLotteryPredResult'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.textContent = normalizedPrediction;
+                el.classList.remove('big', 'small');
+                if (predictionValue) {
+                    el.classList.add(normalizedPrediction === 'BIG' ? 'big' : 'small');
+                }
+            });
+            
+            ['predRate', 'ckLotteryPredRate'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.textContent = normalizedRateText;
+                el.classList.remove('low', 'medium', 'high');
+                if (normalizedRateClass) {
+                    el.classList.add(normalizedRateClass);
+                }
+            });
+        }
 
         function updateStats(results) {
-            const statsBox = document.getElementById('mergedStats');
             if (!results || results.length === 0) {
-                if (statsBox) statsBox.style.display = 'none';
+                schedulePredictionSystemUpdate([]);
                 updatePredictionPanel(null);
                 return;
             }
-
-            const bigCount = results.filter(r => classifyBigSmall(r.number) === 'BIG').length;
-            const smallCount = results.filter(r => classifyBigSmall(r.number) === 'SMALL').length;
-
-            document.getElementById('bigCount').textContent = bigCount;
-            document.getElementById('smallCount').textContent = smallCount;
-            
-            const maxCount = Math.max(bigCount, smallCount, 1);
-            document.getElementById('bigCountBar').style.width = ((bigCount / maxCount) * 100) + '%';
-            document.getElementById('smallCountBar').style.width = ((smallCount / maxCount) * 100) + '%';
-            
-            if (statsBox) {
-                statsBox.style.display = 'block';
-            }
-
+            schedulePredictionSystemUpdate(results);
             updatePredictionPanel(results);
         }
 
@@ -3299,6 +2835,17 @@
         function getPeriodKey(r) {
             const v = r.period ?? r.issueNumber ?? r.issue ?? r.periodNumber ?? '';
             return String(v);
+        }
+
+        function formatPeriodDisplay(rawValue) {
+            const raw = String(rawValue ?? '').trim();
+            if (!raw) return '-';
+            const digits = raw.replace(/\D/g, '');
+            if (!digits) return '-';
+            const normalized = digits.length > 5 ? digits.slice(-5) : digits;
+            if (normalized.length === 3) return '10' + normalized;
+            if (normalized.length === 4) return '1' + normalized;
+            return normalized;
         }
 
         function renderTable(fullResults, historyResults) {
@@ -3355,7 +2902,6 @@
                 const numberClass = index === 1 ? 'number-column number-highlight' : 'number-column';
                 const bigSmallClass = bigSmall === 'BIG' ? 'result-big' : bigSmall === 'SMALL' ? 'result-small' : '';
                 const hashClass = index === 0 ? 'hash-highlight' : '';
-
                 const idxInFull = fullResults.findIndex(x => getPeriodKey(x) === getPeriodKey(result));
                 let resultHtml = '<span class="pending-tag">-</span>';
                 const outcome = idxInFull >= 0 ? computeRowOutcome(fullResults, idxInFull) : null;
@@ -3383,6 +2929,10 @@
             `;
 
             tableContainer.innerHTML = html;
+            const ckLotteryContainer = document.getElementById('ckLotteryContainer');
+            if (ckLotteryContainer && ckLotteryContainer.style.display !== 'none') {
+                updateCkLotteryPrediction();
+            }
         }
 
         function processFirebaseData(data) {
@@ -3459,21 +3009,210 @@
             }
         }
 
+        // ========== BOTTOM MENU BUTTONS FUNCTIONALITY ==========
+        const CK_LOTTERY_LINK = 'https://www.bigwingame.cc/#/register?invitationCode=22884102596';
+        
+        function setupMenuButtons() {
+            const navToWasiteBtn = document.getElementById('navToWasiteBtn');
+            const navToViewBtn = document.getElementById('navToViewBtn');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const ckLotteryContainer = document.getElementById('ckLotteryContainer');
+            
+            // Show View Page button when results container is unlocked
+            function showNavigationButtons() {
+                if (resultsContainer && resultsContainer.classList.contains('unlocked')) {
+                    // Show button on View Page (right side)
+                    if (navToWasiteBtn && resultsContainer.style.display !== 'none') {
+                        navToWasiteBtn.style.display = 'flex';
+                    } else if (navToWasiteBtn) {
+                        navToWasiteBtn.style.display = 'none';
+                    }
+                    
+                    // Show button on TrxWin Wasite (left side)
+                    if (navToViewBtn && ckLotteryContainer && ckLotteryContainer.style.display !== 'none') {
+                        navToViewBtn.style.display = 'flex';
+                    } else if (navToViewBtn) {
+                        navToViewBtn.style.display = 'none';
+                    }
+                }
+            }
+            
+            // Observer to watch for unlocked state
+            if (resultsContainer) {
+                const observer = new MutationObserver(function(mutations) {
+                    showNavigationButtons();
+                });
+                
+                observer.observe(resultsContainer, { attributes: true, attributeFilter: ['class'] });
+                
+                // Check immediately
+                if (resultsContainer.classList.contains('unlocked')) {
+                    showNavigationButtons();
+                }
+            }
+            
+            // View Page button (right) - goes to TrxWin Wasite
+            if (navToWasiteBtn) {
+                navToWasiteBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Hide results container
+                    if (resultsContainer) {
+                        resultsContainer.style.display = 'none';
+                    }
+                    
+                    // Show TrxWin Wasite container
+                    if (ckLotteryContainer) {
+                        ckLotteryContainer.style.display = 'flex';
+                        
+                        // Update height for mobile browser UI
+                        updateWasiteHeight();
+                        
+                        // Ensure iframe exists and is visible
+                        let iframe = document.getElementById('ckLotteryIframe');
+                        if (!iframe) {
+                            iframe = document.createElement('iframe');
+                            iframe.id = 'ckLotteryIframe';
+                            iframe.src = CK_LOTTERY_LINK;
+                            iframe.title = 'TrxWin Wasite';
+                            iframe.frameBorder = '0';
+                            ckLotteryContainer.appendChild(iframe);
+                        } else {
+                            iframe.style.display = 'block';
+                            if (iframe.src !== CK_LOTTERY_LINK) {
+                                iframe.src = CK_LOTTERY_LINK;
+                            }
+                        }
+                        
+                        // Update Prediction Box
+                        updateCkLotteryPrediction();
+                    }
+                    
+                    // Show/hide navigation buttons
+                    if (navToWasiteBtn) navToWasiteBtn.style.display = 'none';
+                    if (navToViewBtn) navToViewBtn.style.display = 'flex';
+                    
+                    return false;
+                });
+            }
+            
+            // TrxWin Wasite button (left) - goes to View Page
+            if (navToViewBtn) {
+                navToViewBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Show results container
+                    if (resultsContainer) {
+                        resultsContainer.style.display = 'block';
+                    }
+                    
+                    // Hide TrxWin Wasite container
+                    if (ckLotteryContainer) {
+                        ckLotteryContainer.style.display = 'none';
+                    }
+                    
+                    // Show/hide navigation buttons
+                    if (navToWasiteBtn) navToWasiteBtn.style.display = 'flex';
+                    if (navToViewBtn) navToViewBtn.style.display = 'none';
+                    
+                    // Scroll to top
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    
+                    return false;
+                });
+            }
+        }
+        
+        // Update Prediction Box for TrxWin Wasite (same prediction as main view)
+        function updateCkLotteryPrediction() {
+            if (typeof currentResults === 'undefined' || !currentResults || currentResults.length === 0) {
+                setPredictionDisplays('-', '-', '-');
+                togglePredictionBoxes(false);
+                return;
+            }
+            
+            const nextPrediction = calculatePrediction(currentResults);
+            const latestResult = currentResults[0];
+            
+            const latestPeriodKey = latestResult ? getPeriodKey(latestResult) : '';
+            if (nextPrediction && latestPeriodKey) {
+                let lastPeriodStr = latestPeriodKey.toString();
+                let nextPeriod = "Unknown";
+                
+                try {
+                    let bigIntPeriod = BigInt(lastPeriodStr);
+                    let nextIntPeriod = bigIntPeriod + 1n;
+                    let nextPeriodStr = nextIntPeriod.toString();
+                    nextPeriod = formatPeriodDisplay(nextPeriodStr);
+                } catch(e) {
+                    console.error("Period parse error", e);
+                    nextPeriod = "Error";
+                }
+                
+                const rate = calculateRate(currentResults);
+                setPredictionDisplays(nextPeriod, nextPrediction, rate);
+                togglePredictionBoxes(true);
+            } else {
+                setPredictionDisplays('-', '-', '-');
+                togglePredictionBoxes(false);
+            }
+        }
+
+        // Fix Wasite container height for mobile browser UI
+        function updateWasiteHeight() {
+            const container = document.getElementById('ckLotteryContainer');
+            const iframe = document.getElementById('ckLotteryIframe');
+            
+            if (container) {
+                // Use window.innerHeight instead of 100vh to account for browser UI
+                const actualHeight = window.innerHeight;
+                container.style.height = actualHeight + 'px';
+                
+                if (iframe) {
+                    iframe.style.height = actualHeight + 'px';
+                }
+            }
+        }
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            startIntroAnimation();
+            document.getElementById('gate').style.display = 'block';
+            initializeAfterIntro();
+
+            // Setup menu buttons after page is loaded
+            setTimeout(setupMenuButtons, 100);
+            
+            // Update Wasite height for mobile browser UI
+            updateWasiteHeight();
         });
+        
+        // Update Wasite height on resize and orientation change
+        window.addEventListener('resize', updateWasiteHeight);
+        window.addEventListener('orientationchange', function() {
+            setTimeout(updateWasiteHeight, 100);
+        });
+        
+        // Update when browser UI appears/disappears (mobile scroll)
+        let lastHeight = window.innerHeight;
+        window.addEventListener('scroll', function() {
+            const currentHeight = window.innerHeight;
+            if (Math.abs(currentHeight - lastHeight) > 50) {
+                lastHeight = currentHeight;
+                setTimeout(updateWasiteHeight, 100);
+            }
+        }, { passive: true });
 
         // Cleanup on page unload
         window.addEventListener('beforeunload', function() {
             if (firebaseListener && db) {
                 db.ref(FIREBASE_PATH).off('value', firebaseListener);
             }
-            if (predictionListener && predictionDb) {
-                predictionDb.ref('predictions/' + PREDICTION_CHANNEL_KEY).off('value', predictionListener);
-            }
         });
     </script>
 </body>
 </html>
+
+
 
